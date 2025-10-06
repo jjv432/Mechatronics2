@@ -44,32 +44,30 @@ void loop() {
   if (buttonState == 0 && lastButtonState == 1) {
     delay(dt);
     state++;
-    if (state > 3) state = 1;
   } else {
     delay(dt);
   }
   lastButtonState = buttonState;
   // CYCLE OFF BUTTON PRESSES
   
-  if (limsw == 1) { 
+  if (limsw && distance <= 75 && distance >= 1) { 
     //Actuate off distance
-    if (distance <= 75 && distance >= 1) {
-      switch (state) {
-        case 1:
-          desPos = 300;   // FINE TUNE THIS: VALUE IS LARGE
-          break;
-        case 2:
-          desPos = 600;   // FINE TUNE THIS: VALUE IS MEDIUM
-          break;
-        case 3:
-          desPos = 1000;  // FINE TUNE THIS: VALUE IS SMALL
-          break;
-      }
-    } else {
-      desPos = 0; 
+    if (state < 1){
+      desPos = 0;
     }
+    else if (state < 2){
+      desPos = 300;
+    }
+    else if (state < 3){
+      desPos = 600;
+    }
+    else if (state < 4){
+      desPos = 1000;
+    }
+    else if (state >= 4){
+      state = 1;
   } 
-  else if (limsw == 0) { 
+  else if (!limsw) { 
     // limit switch pressed → back off until released
     curPos--;
   }
