@@ -3,7 +3,6 @@ int curPos = 0;
 int desPos = 0;
 int buttonState = 0;
 int lastButtonState = 0;
-bool buttonPressed;
 int dt = 200;
 int closedSteps = 1000; // 1 in == 300 steps
 int limsw;
@@ -38,23 +37,20 @@ void loop() {
 // BITMASK
   limsw = (PINC & 1);
 // Pulse Sensor
-  sendTrigger();
-  timing = pulseIn(echo_pin, HIGH);
-  distance = (timing * 0.0343) / 2.0;
+  distance = measureDistance();
+  
   buttonState = PINB & 0b1;
   // Detect Button
   if (buttonState == 0 && lastButtonState == 1) {
     delay(dt);
-    buttonPressed = 1;
+    state++;
+    if (state > 3) state = 1;
   } else {
-    buttonPressed = 0;
+    delay(dt);
   }
   lastButtonState = buttonState;
   // CYCLE OFF BUTTON PRESSES
-  if (buttonPressed) {
-    state++;
-    if (state > 3) state = 1;
-  }
+  
   if (limsw == 1) { 
     //Actuate off distance
     if (distance <= 75 && distance >= 1) {
@@ -75,17 +71,29 @@ void loop() {
   } 
   else if (limsw == 0) { 
     // limit switch pressed → back off until released
-    if (curPos > 0) {
-      curPos--;  //1 step at a time
-      PORTA = fullSteps[curPos % 4];
-      delay(4);
-    } else {
-      // ONLY OPEN TILL OF LIMIT
-      desPos = 0;
-    }
-    // STOP UNLESS RELEASED
-    return;  
+    curPos--;
   }
+
+  driveMotor();
+  printData();
+
+}
+void sendTrigger() {
+  digitalWrite(trig_pin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig_pin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig_pin, LOW);
+}
+float measureDistance(){
+  sendTrigger();
+  timing = pulseIn(echo_pin, HIGH);
+  static float timingRatio = (0.0343) / 2.0;
+  distance = timing * timingRatio;
+  return distance;
+}
+
+void driveMotor(){
   // MOVE TO DESPOS
   if (curPos < desPos) {
     curPos++;
@@ -95,16 +103,14 @@ void loop() {
 
   PORTA = fullSteps[curPos % 4];
   delay(4);
-// Serial Print Data
+}
+
+void printData(){
+  // Serial Print Data
   Serial.println("Data:");
   Serial.print("Distance: ");
   Serial.print(distance);
   Serial.print(" cm \n");
   Serial.println(limsw);
 }
-void sendTrigger() {
-  digitalWrite(trig_pin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trig_pin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trig_pin, LOW);
+  
