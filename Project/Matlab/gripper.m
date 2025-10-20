@@ -55,7 +55,7 @@ classdef gripper
             positions = [b1; b2; p; e];
 
             % Tip
-            thetas = linspace(-pi/2, pi/2, 100);
+            thetas = linspace(-pi/2, pi/2, 200);
             r = .2;
             tip_x = r*cos(thetas);
             tip_y = r*sin(thetas);
@@ -148,8 +148,8 @@ classdef gripper
                     cur_theta = searchThetas(ctr);
                     [positions,tip] = obj.definePositions(cur_theta);
                     endEffectorPosition = positions(end, :);
-                    if sum(inpolygon(tip(1,:), tip(2,:), obstacle.coords(1,:), obstacle.coords(2,:))) > 0
-                        disp("Contact");
+                    [in, on] = inpolygon(tip(1,:), tip(2,:), obstacle.coords(1,:), obstacle.coords(2,:));
+                    if (sum(in) + sum(on)) > 0
                         contact = 1;
                         contactPositions = [contactPositions;endEffectorPosition];
                     end
@@ -170,7 +170,12 @@ classdef gripper
             x_vals = endEffectorPositions(:, 1);
             y_vals = endEffectorPositions(:, 2);
             gca;
-            scatter(x_vals, y_vals, 'x');
+            if obj.handedness == 'r'
+                color = 'r';
+            else
+                color = 'b';
+            end
+            scatter(x_vals, y_vals, 'x', color);
             axis equal
         end
 
