@@ -19,7 +19,7 @@ classdef obstacle
         function obj = makeCoords(obj)
 
             if obj.shape == "square"
-                obj.coords = 1/2*[-1 -1 1 1; -1 1 1 -1]; 
+                obj.coords = [-1 -1 1 1; -1 1 1 -1]; 
             elseif obj.shape == "circle"
                 thetas = linspace(0, 2*pi, 500);
                 r = 1;
