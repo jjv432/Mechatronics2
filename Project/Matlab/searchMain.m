@@ -1,5 +1,7 @@
 clc; clearvars; close all
 
+addpath('src');
+
 %{
 Would make more sense for it to start on the ground then make its way up.
 That way, whenever it reaches a local maxima on diameter, it'll just stop
