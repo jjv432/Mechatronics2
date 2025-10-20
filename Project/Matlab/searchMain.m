@@ -7,7 +7,7 @@ That way, whenever it reaches a local maxima on diameter, it'll just stop
 Also, can add feature where if they run into each other they'll know
 they've gone over the object.
 %}
-searchParams.startY = 2;
+searchParams.startY = 1.5;
 searchParams.endY = 0;
 searchParams.startTheta = pi/4;
 searchParams.endTheta = 3*pi/4;
