@@ -8,6 +8,7 @@ classdef gripper
         endEffectorLength = 5;
 
         basePosition = [0,0];
+        handedness = "l"
     end
 
     methods
@@ -19,6 +20,7 @@ classdef gripper
             addParameter(p, 'parallelLinkLength', obj.parallelLinkLength);
             addParameter(p, 'endEffectorLength', obj.endEffectorLength);
             addParameter(p, 'basePosition', obj.basePosition);
+            addParameter(p, 'handedness', obj.handedness);
 
             parse(p, varargin{:});
 
@@ -26,6 +28,7 @@ classdef gripper
             obj.parallelLinkLength = p.Results.parallelLinkLength;
             obj.endEffectorLength = p.Results.endEffectorLength;
             obj.basePosition = p.Results.basePosition;
+            obj.handedness = p.Results.handedness;
 
 
 
@@ -37,6 +40,12 @@ classdef gripper
             r_b1b2 = [-obj.baseLinkLength, 0];
             r_b2p = -[obj.parallelLinkLength*cos(theta), obj.parallelLinkLength*sin(theta)];
             r_pe = [obj.endEffectorLength, 0];
+
+            if obj.handedness == 'r'
+                r_b1b2 = -r_b1b2;
+                r_b2p(1) = -r_b2p(1);
+                r_pe = -r_pe;
+            end
 
             b1 = r_ob1;
             b2 = b1 + r_b1b2;
@@ -50,6 +59,10 @@ classdef gripper
             r = .2;
             tip_x = r*cos(thetas);
             tip_y = r*sin(thetas);
+
+            if obj.handedness == 'r'
+                tip_x = -tip_x;
+            end
 
             tip = [tip_x; tip_y] + e';
         end
@@ -79,15 +92,19 @@ classdef gripper
 
             e_x = [p2x, p2x, ex, ex];
             e_y = [p2y-eps, ey+eps, ey+eps, p2y-eps];
-            
+
             tip_x = tip(1, :);
             tip_y = tip(2, :);
-          
+
             gca;
             hold on
             h1 = fill(base_x, base_y, 'k');
             h2 = plot(par_x, par_y, 'LineWidth', 2, 'Color', 'r');
-            h3 = plot(par_x + obj.baseLinkLength, par_y, 'LineWidth', 2, 'Color', 'b');
+            if obj.handedness == 'l'
+                h3 = plot(par_x + obj.baseLinkLength, par_y, 'LineWidth', 2, 'Color', 'b');
+            else
+                h3 = plot(par_x - obj.baseLinkLength, par_y, 'LineWidth', 2, 'Color', 'b');
+            end
             h4 = fill(e_x, e_y, 'r');
             h5 = fill(tip_x, tip_y, 'k');
             axis([-7 7 -5 5]);
@@ -121,7 +138,7 @@ classdef gripper
             searchThetas = startTheta:dtheta:endTheta;
 
             contactPositions = [];
-     
+
 
             for i = 1:numel(searchYs)
                 obj.basePosition(2) = searchYs(i);
