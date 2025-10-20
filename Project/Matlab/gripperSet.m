@@ -91,9 +91,11 @@ classdef gripperSet
                         else
                             h_rhs = obj.rhs.plotPosition(contact_rhs_theta);
                         end
-                        
+
                         drawnow;
-                        writeVideo(writerObj, getframe(gcf));
+                        if searchParams.saveBool
+                            writeVideo(writerObj, getframe(gcf));
+                        end
                         delete([h_lhs,h_rhs]);
 
                     end

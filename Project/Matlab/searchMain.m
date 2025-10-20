@@ -14,7 +14,7 @@ searchParams.endTheta = 3*pi/4;
 searchParams.dy = .1;
 searchParams.dtheta = .05;
 
-searchParams.animateBool = 0;
+searchParams.animateBool = 1;
 searchParams.saveBool = 0;
 
 lh_grip = gripper('basePosition', [-3.5 2.5], 'parallelLinkLength', 1, 'endEffectorLength', 4);
