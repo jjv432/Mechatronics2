@@ -1,6 +1,4 @@
 classdef gripperSet
-    %UNTITLED5 Summary of this class goes here
-    %   Detailed explanation goes here
 
     properties
         lhs
@@ -15,10 +13,6 @@ classdef gripperSet
 
         function [contactPosition_lhs, contactPosition_rhs] = searchHeight(obj, obstacle, searchParams, height)
 
-            if searchParams.saveBool
-                searchParams.animateBool = 1;
-            end
-
             obstacle.drawObstacle();
 
             startTheta = searchParams.startTheta;
@@ -29,14 +23,6 @@ classdef gripperSet
 
             contactPosition_lhs = [];
             contactPosition_rhs = [];
-
-            if searchParams.saveBool
-                writerObj = VideoWriter('animation.mp4');
-                writerObj.FrameRate = 30;
-                open(writerObj);
-            end
-
-
 
             obj.lhs.basePosition(2) = height;
             obj.rhs.basePosition(2) = height;
@@ -52,25 +38,11 @@ classdef gripperSet
                 % Define positions of each mechanism if they haven't
                 % made contact yet
                 if ~contact_lhs
-                    [positions_lhs,tip_lhs] = obj.lhs.definePositions(cur_theta);
-                    endEffectorPosition_lhs = positions_lhs(end, :);
-                    [in_lhs, on_lhs] = inpolygon(tip_lhs(1,:), tip_lhs(2,:), obstacle.coords(1,:), obstacle.coords(2,:));
-                    if sum([in_lhs, on_lhs]) > 0
-                        contact_lhs = 1;
-                        contact_lhs_theta = cur_theta;
-                        contactPosition_lhs = endEffectorPosition_lhs;
-                    end
+                    [contact_lhs, contact_lhs_theta, contactPosition_lhs] = detectContact(obj, cur_theta, 'l', obstacle);
                 end
 
                 if ~contact_rhs
-                    [positions_rhs,tip_rhs] = obj.rhs.definePositions(cur_theta);
-                    endEffectorPosition_rhs = positions_rhs(end, :);
-                    [in_rhs, on_rhs] = inpolygon(tip_rhs(1,:), tip_rhs(2,:), obstacle.coords(1,:), obstacle.coords(2,:));
-                    if sum([in_rhs, on_rhs]) > 0
-                        contact_rhs = 1;
-                        contact_rhs_theta = cur_theta;
-                        contactPosition_rhs = endEffectorPosition_rhs;
-                    end
+                    [contact_rhs, contact_rhs_theta, contactPosition_rhs] = detectContact(obj, cur_theta, 'r', obstacle);
                 end
 
                 ctr = ctr + 1;
@@ -98,7 +70,25 @@ classdef gripperSet
             end
         end
 
+        function [contact, contact_theta, contactPosition] = detectContact(obj, theta, hand, obstacle)
+            contact = 0;
+            contact_theta = [];
+            contactPosition = [];
+            if hand == 'r'
+                [positions,tip] = obj.rhs.definePositions(theta);
+            elseif hand == 'l'
+                [positions,tip] = obj.lhs.definePositions(theta);
+            end
 
+            endEffectorPosition = positions(end, :);
+            [in, on] = inpolygon(tip(1,:), tip(2,:), obstacle.coords(1,:), obstacle.coords(2,:));
+            if sum([in, on]) > 0
+                contact= 1;
+                contact_theta = theta;
+                contactPosition = endEffectorPosition;
+            end
+
+        end
         function [contactPositions_lhs, contactPositions_rhs] = detectObstacle(obj, obstacle, searchParams)
 
             if searchParams.saveBool
