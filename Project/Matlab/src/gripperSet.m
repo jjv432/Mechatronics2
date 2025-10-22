@@ -3,14 +3,16 @@ classdef gripperSet
     properties
         lhs
         rhs
-        sP
+        sP = [];
     end
 
     methods
         function obj = gripperSet(lhs, rhs,searchParams)
             obj.lhs = lhs;
             obj.rhs = rhs;
-            obj.sP = searchParams;
+            if nargin == 3
+                obj.sP = searchParams;
+            end
         end
 
         function [contactPosition_lhs, contactPosition_rhs] = searchHeight(obj, obstacle, height)

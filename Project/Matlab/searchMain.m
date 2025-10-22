@@ -16,9 +16,9 @@ rh_grip = gripper('handedness', 'r', 'basePosition', [4 2.5], 'parallelLinkLengt
 
 %% Simulataneous Grip
 searchParams = getSearchParams();
-hand = gripperSet(lh_grip, rh_grip, searchParams);
+hand = gripperSet(lh_grip, rh_grip);
 
-%** Multiple shapes **
+% ** Multiple shapes **
 shapes = ["circle", "square", "sine"];
 figure();
 sgtitle("Detection of Obstacle Shape");
