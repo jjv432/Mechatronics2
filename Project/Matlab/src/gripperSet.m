@@ -98,29 +98,22 @@ classdef gripperSet
             end
 
         end
-        function [contactPositions_lhs, contactPositions_rhs] = detectObstacle(obj, obstacle, searchParams)
+        function [contactPositions_lhs, contactPositions_rhs] = detectObstacle(obj, obstacle, sP)
+            %** Detect the entirety of an object
 
-            if searchParams.saveBool
-                searchParams.animateBool = 1;
-            end
-
-            startY = searchParams.startY;
-            endY = searchParams.endY;
-            dy = searchParams.dy;
-
-            searchYs = startY:-dy:endY;
+            searchYs = sP.startY:-sP.dy:sP.endY;
 
             contactPositions_lhs = [];
             contactPositions_rhs = [];
 
-            if searchParams.saveBool
+            if sP.saveBool
                 writerObj = VideoWriter('animation.mp4');
                 writerObj.FrameRate = 30;
                 open(writerObj);
             end
 
             for i = 1:numel(searchYs)
-                [l, r] = searchHeight(obj, obstacle, searchParams, searchYs(i));
+                [l, r] = searchHeight(obj, obstacle, sP, searchYs(i));
                 contactPositions_lhs = [contactPositions_lhs; l];
                 contactPositions_rhs = [contactPositions_rhs; r];
             end

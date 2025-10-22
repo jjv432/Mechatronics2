@@ -9,15 +9,8 @@ That way, whenever it reaches a local maxima on diameter, it'll just stop
 Also, can add feature where if they run into each other they'll know
 they've gone over the object.
 %}
-searchParams.startY = 2;
-searchParams.endY = 0;
-searchParams.startTheta = pi/4;
-searchParams.endTheta = 3*pi/4;
-searchParams.dy = .1;
-searchParams.dtheta = .05;
 
-searchParams.animateBool = 0;
-searchParams.saveBool = 0;
+searchParams = getSearchParams();
 
 lh_grip = gripper('basePosition', [-3.5 2.5], 'parallelLinkLength', 1, 'endEffectorLength', 4);
 rh_grip = gripper('handedness', 'r', 'basePosition', [4 2.5], 'parallelLinkLength', 1, 'endEffectorLength', 4);
