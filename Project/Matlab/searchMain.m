@@ -16,7 +16,7 @@ rh_grip = gripper('handedness', 'r', 'basePosition', [4 2.5], 'parallelLinkLengt
 
 %% Simulataneous Grip
 searchParams = getSearchParams();
-hand = gripperSet(lh_grip, rh_grip);
+hand = gripperSet(lh_grip, rh_grip, searchParams);
 
 % ** Multiple shapes **
 shapes = ["circle", "square", "sine"];
