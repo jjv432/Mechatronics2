@@ -54,27 +54,32 @@ classdef gripperSet
                 % This will freeze the arm in the same position if it has
                 % already come into contact with the obstacle
                 if obj.sP.animateBool
-                    if ~contact_lhs
-                        h_lhs = obj.lhs.plotPosition(cur_theta);
-                    else
-                        h_lhs = obj.lhs.plotPosition(contact_lhs_theta);
-                    end
-
-                    if ~contact_rhs
-                        h_rhs = obj.rhs.plotPosition(cur_theta);
-                    else
-                        h_rhs = obj.rhs.plotPosition(contact_rhs_theta);
-                    end
-
-                    drawnow;
-                    if obj.sP.saveBool
-                        writeVideo(writerObj, getframe(gcf));
-                    end
-                    delete([h_lhs,h_rhs]);
-
+                    obj.animateSet(cur_theta, contact_lhs, contact_rhs, contact_lhs_theta, contact_rhs_theta)
                 end
             end
         end
+
+        function animateSet(obj, cur_theta, contact_lhs, contact_rhs, contact_lhs_theta, contact_rhs_theta)
+            if ~contact_lhs
+                h_lhs = obj.lhs.plotPosition(cur_theta);
+            else
+                h_lhs = obj.lhs.plotPosition(contact_lhs_theta);
+            end
+
+            if ~contact_rhs
+                h_rhs = obj.rhs.plotPosition(cur_theta);
+            else
+                h_rhs = obj.rhs.plotPosition(contact_rhs_theta);
+            end
+
+            drawnow;
+            if obj.sP.saveBool
+                writeVideo(writerObj, getframe(gcf));
+            end
+            delete([h_lhs,h_rhs]);
+
+        end
+
 
         function [contact, contact_theta, contactPosition] = detectContact(obj, theta, hand, obstacle)
             %** detect contact between the hand and the obstacle

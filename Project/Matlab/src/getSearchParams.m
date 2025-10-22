@@ -7,7 +7,7 @@ function searchParams = getSearchParams
     searchParams.dy = .1;
     searchParams.dtheta = .05;
 
-    searchParams.animateBool = 0;
+    searchParams.animateBool = 1;
     searchParams.saveBool = 0;
 
     if searchParams.saveBool
