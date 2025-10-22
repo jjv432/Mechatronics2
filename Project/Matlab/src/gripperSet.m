@@ -12,6 +12,8 @@ classdef gripperSet
         end
 
         function [contactPosition_lhs, contactPosition_rhs] = searchHeight(obj, obstacle, searchParams, height)
+            
+            %** Search for contact with the obstacle at a given height
 
             obstacle.drawObstacle();
 
@@ -47,6 +49,8 @@ classdef gripperSet
 
                 ctr = ctr + 1;
 
+                % This will freeze the arm in the same position if it has
+                % already come into contact with the obstacle
                 if searchParams.animateBool
                     if ~contact_lhs
                         h_lhs = obj.lhs.plotPosition(cur_theta);
@@ -71,15 +75,20 @@ classdef gripperSet
         end
 
         function [contact, contact_theta, contactPosition] = detectContact(obj, theta, hand, obstacle)
+            %** detect contact between the hand and the obstacle
+
             contact = 0;
             contact_theta = [];
             contactPosition = [];
+
             if hand == 'r'
                 [positions,tip] = obj.rhs.definePositions(theta);
             elseif hand == 'l'
                 [positions,tip] = obj.lhs.definePositions(theta);
             end
 
+            % Check for collisions and return contact, theta, and position
+            % if so
             endEffectorPosition = positions(end, :);
             [in, on] = inpolygon(tip(1,:), tip(2,:), obstacle.coords(1,:), obstacle.coords(2,:));
             if sum([in, on]) > 0
@@ -94,8 +103,6 @@ classdef gripperSet
             if searchParams.saveBool
                 searchParams.animateBool = 1;
             end
-
-            obstacle.drawObstacle();
 
             startY = searchParams.startY;
             endY = searchParams.endY;

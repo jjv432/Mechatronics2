@@ -16,7 +16,7 @@ searchParams.endTheta = 3*pi/4;
 searchParams.dy = .1;
 searchParams.dtheta = .05;
 
-searchParams.animateBool = 1;
+searchParams.animateBool = 0;
 searchParams.saveBool = 0;
 
 lh_grip = gripper('basePosition', [-3.5 2.5], 'parallelLinkLength', 1, 'endEffectorLength', 4);
@@ -24,41 +24,27 @@ rh_grip = gripper('handedness', 'r', 'basePosition', [4 2.5], 'parallelLinkLengt
 
 
 %% Simulataneous Grip
-obst = obstacle("shape", "square");
 hand = gripperSet(lh_grip, rh_grip);
+
+%** Single obstacle **
+% obst = obstacle("shape", "square");
+
 % hand.detectObstacle(obst, searchParams);
-hand.predictObstacle(obst, searchParams);
-% 
-% 
-% shapes = ["circle", "square", "sine"];
-% figure();
-% sgtitle("Detection of Obstacle Shape");
-% for i = 1:numel(shapes)
-% 
-%     obst = obstacle("shape", shapes(i));
-%     subplot(2, 2, i)
-%     hold on
-%     hand.predictObstacle(obst, searchParams);
-%     obst.drawObstacle;
-%     hold off
-%     axis padded
-% end
+% hand.predictObstacle(obst, searchParams);
 
-%% OLD
-% rh_grip.plotPosition(pi/2);
-% lh_grip.plotPosition(pi/2);
+%** Multiple shapes **
 
-% shapes = ["circle", "square", "sine"];
-% figure();
-% sgtitle("Detection of Obstacle Shape");
-% for i = 1:numel(shapes)
-% 
-%     obst = obstacle("shape", shapes(i));
-%     subplot(2, 2, i)
-%     hold on
-%     rh_grip.predictObstacle(obst, searchParams)
-%     lh_grip.predictObstacle(obst, searchParams)
-%     obst.drawObstacle;
-%     hold off
-%     axis padded
-% end
+
+shapes = ["circle", "square", "sine"];
+figure();
+sgtitle("Detection of Obstacle Shape");
+for i = 1:numel(shapes)
+
+    obst = obstacle("shape", shapes(i));
+    subplot(2, 2, i)
+    hold on
+    hand.predictObstacle(obst, searchParams);
+    obst.drawObstacle;
+    hold off
+    axis padded
+end
