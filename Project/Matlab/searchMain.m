@@ -18,17 +18,7 @@ rh_grip = gripper('handedness', 'r', 'basePosition', [4 2.5], 'parallelLinkLengt
 searchParams = getSearchParams();
 hand = gripperSet(lh_grip, rh_grip, searchParams);
 
-
-
-%** Single obstacle **
-% obst = obstacle("shape", "square");
-
-% hand.detectObstacle(obst, searchParams);
-% hand.predictObstacle(obst, searchParams);
-
 %** Multiple shapes **
-
-
 shapes = ["circle", "square", "sine"];
 figure();
 sgtitle("Detection of Obstacle Shape");
@@ -42,3 +32,10 @@ for i = 1:numel(shapes)
     hold off
     axis padded
 end
+
+
+%** Single obstacle **
+% obst = obstacle("shape", "square");
+
+% hand.detectObstacle(obst, searchParams);
+% hand.predictObstacle(obst, searchParams);

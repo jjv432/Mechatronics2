@@ -3,34 +3,32 @@ classdef gripperSet
     properties
         lhs
         rhs
-        searchParams
+        sP
     end
 
     methods
         function obj = gripperSet(lhs, rhs,searchParams)
             obj.lhs = lhs;
             obj.rhs = rhs;
-            obj.searchParams = searchParams;
+            obj.sP = searchParams;
         end
 
         function [contactPosition_lhs, contactPosition_rhs] = searchHeight(obj, obstacle, height)
-            
+
             %** Search for contact with the obstacle at a given height
 
             obstacle.drawObstacle();
 
-            startTheta = obj.searchParams.startTheta;
-            endTheta = obj.searchParams.endTheta;
-            dtheta = obj.searchParams.dtheta;
-
-            searchThetas = startTheta:dtheta:endTheta;
+            searchThetas = obj.sP.startTheta:obj.sP.dtheta:obj.sP.endTheta;
 
             contactPosition_lhs = [];
             contactPosition_rhs = [];
 
             obj.lhs.basePosition(2) = height;
             obj.rhs.basePosition(2) = height;
+
             ctr = 1;
+
             contact_lhs = 0;
             contact_rhs = 0;
 
@@ -53,7 +51,7 @@ classdef gripperSet
 
                 % This will freeze the arm in the same position if it has
                 % already come into contact with the obstacle
-                if obj.searchParams.animateBool
+                if obj.sP.animateBool
                     if ~contact_lhs
                         h_lhs = obj.lhs.plotPosition(cur_theta);
                     else
@@ -67,7 +65,7 @@ classdef gripperSet
                     end
 
                     drawnow;
-                    if obj.searchParams.saveBool
+                    if obj.sP.saveBool
                         writeVideo(writerObj, getframe(gcf));
                     end
                     delete([h_lhs,h_rhs]);
@@ -103,12 +101,12 @@ classdef gripperSet
         function [contactPositions_lhs, contactPositions_rhs] = detectObstacle(obj, obstacle)
             %** Detect the entirety of an object
 
-            searchYs = obj.searchParams.startY:-obj.searchParams.dy:obj.searchParams.endY;
+            searchYs = obj.sP.startY:-obj.sP.dy:obj.sP.endY;
 
             contactPositions_lhs = [];
             contactPositions_rhs = [];
 
-            if obj.searchParams.saveBool
+            if obj.sP.saveBool
                 writerObj = VideoWriter('animation.mp4');
                 writerObj.FrameRate = 30;
                 open(writerObj);
