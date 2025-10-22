@@ -3,23 +3,25 @@ classdef gripperSet
     properties
         lhs
         rhs
+        searchParams
     end
 
     methods
-        function obj = gripperSet(lhs, rhs)
+        function obj = gripperSet(lhs, rhs,searchParams)
             obj.lhs = lhs;
             obj.rhs = rhs;
+            obj.searchParams = searchParams;
         end
 
-        function [contactPosition_lhs, contactPosition_rhs] = searchHeight(obj, obstacle, searchParams, height)
+        function [contactPosition_lhs, contactPosition_rhs] = searchHeight(obj, obstacle, height)
             
             %** Search for contact with the obstacle at a given height
 
             obstacle.drawObstacle();
 
-            startTheta = searchParams.startTheta;
-            endTheta = searchParams.endTheta;
-            dtheta = searchParams.dtheta;
+            startTheta = obj.searchParams.startTheta;
+            endTheta = obj.searchParams.endTheta;
+            dtheta = obj.searchParams.dtheta;
 
             searchThetas = startTheta:dtheta:endTheta;
 
@@ -51,7 +53,7 @@ classdef gripperSet
 
                 % This will freeze the arm in the same position if it has
                 % already come into contact with the obstacle
-                if searchParams.animateBool
+                if obj.searchParams.animateBool
                     if ~contact_lhs
                         h_lhs = obj.lhs.plotPosition(cur_theta);
                     else
@@ -65,7 +67,7 @@ classdef gripperSet
                     end
 
                     drawnow;
-                    if searchParams.saveBool
+                    if obj.searchParams.saveBool
                         writeVideo(writerObj, getframe(gcf));
                     end
                     delete([h_lhs,h_rhs]);
@@ -98,30 +100,30 @@ classdef gripperSet
             end
 
         end
-        function [contactPositions_lhs, contactPositions_rhs] = detectObstacle(obj, obstacle, sP)
+        function [contactPositions_lhs, contactPositions_rhs] = detectObstacle(obj, obstacle)
             %** Detect the entirety of an object
 
-            searchYs = sP.startY:-sP.dy:sP.endY;
+            searchYs = obj.searchParams.startY:-obj.searchParams.dy:obj.searchParams.endY;
 
             contactPositions_lhs = [];
             contactPositions_rhs = [];
 
-            if sP.saveBool
+            if obj.searchParams.saveBool
                 writerObj = VideoWriter('animation.mp4');
                 writerObj.FrameRate = 30;
                 open(writerObj);
             end
 
             for i = 1:numel(searchYs)
-                [l, r] = searchHeight(obj, obstacle, sP, searchYs(i));
+                [l, r] = searchHeight(obj, obstacle,searchYs(i));
                 contactPositions_lhs = [contactPositions_lhs; l];
                 contactPositions_rhs = [contactPositions_rhs; r];
             end
 
         end
 
-        function predictObstacle(obj, obstacle, searchParams)
-            [endEffectorPositions_lhs, endEffectorPositions_rhs] = obj.detectObstacle(obstacle, searchParams);
+        function predictObstacle(obj, obstacle)
+            [endEffectorPositions_lhs, endEffectorPositions_rhs] = obj.detectObstacle(obstacle);
 
             x_vals_lhs = endEffectorPositions_lhs(:, 1);
             y_vals_lhs = endEffectorPositions_lhs(:, 2);
