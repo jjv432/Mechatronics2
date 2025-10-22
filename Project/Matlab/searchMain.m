@@ -26,22 +26,23 @@ rh_grip = gripper('handedness', 'r', 'basePosition', [4 2.5], 'parallelLinkLengt
 %% Simulataneous Grip
 obst = obstacle("shape", "square");
 hand = gripperSet(lh_grip, rh_grip);
-hand.detectObstacle(obst, searchParams);
-
-
-shapes = ["circle", "square", "sine"];
-figure();
-sgtitle("Detection of Obstacle Shape");
-for i = 1:numel(shapes)
-
-    obst = obstacle("shape", shapes(i));
-    subplot(2, 2, i)
-    hold on
-    hand.predictObstacle(obst, searchParams);
-    obst.drawObstacle;
-    hold off
-    axis padded
-end
+% hand.detectObstacle(obst, searchParams);
+hand.predictObstacle(obst, searchParams);
+% 
+% 
+% shapes = ["circle", "square", "sine"];
+% figure();
+% sgtitle("Detection of Obstacle Shape");
+% for i = 1:numel(shapes)
+% 
+%     obst = obstacle("shape", shapes(i));
+%     subplot(2, 2, i)
+%     hold on
+%     hand.predictObstacle(obst, searchParams);
+%     obst.drawObstacle;
+%     hold off
+%     axis padded
+% end
 
 %% OLD
 % rh_grip.plotPosition(pi/2);
