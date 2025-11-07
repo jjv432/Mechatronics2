@@ -39,3 +39,14 @@ end
 
 % hand.detectObstacle(obst, searchParams);
 % hand.predictObstacle(obst, searchParams);
+
+%% Publishing
+%
+% <include>src/getSearchParams.m</include>
+%
+% <include>src/gripper.m</include>
+%
+% <include>src/gripperSet.m</include>
+%
+% <include>src/obstacle.m</include>
+%

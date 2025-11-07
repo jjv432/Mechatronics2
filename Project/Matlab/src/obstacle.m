@@ -33,7 +33,7 @@ classdef obstacle
 
         end
         function drawObstacle(obj)
-            
+            % obj.makeCoords();
             gca;
             fill(obj.coords(1, :), obj.coords(2, :), 'm');
 
