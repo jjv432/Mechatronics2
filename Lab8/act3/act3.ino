@@ -1,90 +1,80 @@
-// GPT ISR test, run at 1mhz from 24mhz clock, test either GPT1 or GPT2
-//  could do PWM with OCRn registers, but no GPT output pins on T4
-
-volatile uint32_t ticks;
-int lastInterruptUsed = 1;
-int curInterruptUsed = 1;
-int curTimer = 1;
-
-int period = 1;
-bool timer1occured = 0;
-
-bool timer2occured = 0;
+volatile bool timer1occured = 0;
+volatile bool timer2occured = 0;
+int t1 = 5;
+int t2 = 20; // seems to be the only one in control rn
 
 int state = 0;
 bool outputState = 0;
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial);
-  delay(2000);
-  gpt1_init(30000);  // us
-  gpt2_init(70000);  // us
+  // Serial.begin(9600);
+  // while (!Serial);
+  delay(200);
+  gpt1_init(t1);  // us
+  gpt2_init(t2);  // us
   pinMode(14, OUTPUT);
 }
 
 void loop() {
 
+  digitalWrite(14, outputState);
+
   switch (state) {
-    case 0: // period one, on
-    outputState = 1;
+    case 0:  // period one, on
+      outputState = 1;
 
-    if (timer1occured){
-      state = 1;
+      if (timer1occured) {
+        timer1occured = 0;
+        state = 1;
 
-      // about to start counting using timer 2, so reset the count value now
-      GPT2_CNT = 0;
-      timer1occured = 0;
-    }
-    break;
+        // about to start counting using timer 2, so reset the count value now
+        GPT2_OCR1 = t2;
+      }
+      break;
 
-    case 1: // period one, off
-    outputState =0;
+    case 1:  // period one, off
+      outputState = 0;
 
-    if (timer2occured){
-      state = 2;
-      // about to start counting using timer 2, so reset the count value now
-      GPT2_CNT = 0;
-      timer2occured = 0;
-    }
-    
+      if (timer2occured) {
+        timer2occured = 0;
+        state = 2;
 
-    break;
+        // about to start counting using timer 2, so reset the count value now
+        GPT2_OCR1 = t2;
+      }
+      break;
 
-    case 2: // period two, on
+    case 2:  // period two, on
+      outputState = 1;
 
-    outputState = 1;
+      if (timer2occured) {
+        timer2occured = 0;
+        state = 3;
 
-    if (timer2occured){
-      state = 3;
+        // about to start counting using timer 2, so reset the count value now
+        GPT1_OCR1 = t1; // force count to go to 0        
+      }
+      break;
 
-      // about to start counting using timer 2, so reset the count value now
-      GPT1_CNT = 0;
-      timer2occured = 0;
-    }
+    case 3:  // period two, off
+      outputState = 0;
 
-    case 3: // period two, off
+      if (timer1occured) {
+        timer1occured = 0;
+        state = 0;
 
-    outputState = 0;
-
-    if (timer1occured){
-
-      state = 0;
-
-      // about to start counting using timer 1, so reset the count value now
-      GPT1_CNT = 0;
-      timer1occured = 0;
-
-    }
-
+        // about to start counting using timer 1, so reset the count value now
+        GPT1_OCR1 = t1;
+      }
+      break;
   }
 }
 
 
 
 void gpt1_isr() {
-  timer1occured = 1;
   GPT1_SR |= GPT_SR_OF3;  // clear all set bits
+  timer1occured = 1;
 }
 
 void gpt1_init(uint32_t us) {
