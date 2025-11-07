@@ -1,7 +1,7 @@
 volatile bool timer1occured = 0;
 volatile bool timer2occured = 0;
-int t1 = 5;
-int t2 = 20; // seems to be the only one in control rn
+int t1 = 500;
+int t2 = 2000; // seems to be the only one in control rn
 
 int state = 0;
 bool outputState = 0;
@@ -24,11 +24,10 @@ void loop() {
       outputState = 1;
 
       if (timer1occured) {
-        timer1occured = 0;
         state = 1;
 
         // about to start counting using timer 2, so reset the count value now
-        GPT2_OCR1 = t2;
+        reset_cnts();
       }
       break;
 
@@ -36,11 +35,10 @@ void loop() {
       outputState = 0;
 
       if (timer2occured) {
-        timer2occured = 0;
         state = 2;
 
         // about to start counting using timer 2, so reset the count value now
-        GPT2_OCR1 = t2;
+        reset_cnts();
       }
       break;
 
@@ -48,11 +46,10 @@ void loop() {
       outputState = 1;
 
       if (timer2occured) {
-        timer2occured = 0;
         state = 3;
 
         // about to start counting using timer 2, so reset the count value now
-        GPT1_OCR1 = t1; // force count to go to 0        
+        reset_cnts();
       }
       break;
 
@@ -60,16 +57,21 @@ void loop() {
       outputState = 0;
 
       if (timer1occured) {
-        timer1occured = 0;
         state = 0;
 
         // about to start counting using timer 1, so reset the count value now
-        GPT1_OCR1 = t1;
+        reset_cnts();
       }
       break;
   }
 }
 
+void reset_cnts(){
+  GPT1_OCR1 = t1;
+  GPT2_OCR1 = t2;
+  timer1occured = 0;
+  timer2occured = 0;
+}
 
 
 void gpt1_isr() {
