@@ -6,99 +6,112 @@ int lastInterruptUsed = 1;
 int curInterruptUsed = 1;
 int curTimer = 1;
 
-int tickT1 = 0;
-int tickT2 = 0;
+int period = 1;
+bool timer1occured = 0;
 
+bool timer2occured = 0;
+
+int state = 0;
+bool outputState = 0;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial);
   delay(2000);
-  gpt1_init(30000);   // us
-  gpt2_init(70000);   // us
+  gpt1_init(30000);  // us
+  gpt2_init(70000);  // us
   pinMode(14, OUTPUT);
 }
 
 void loop() {
 
-  if (tickT1 == 2){
-    curTimer = 2;
-  }
-  else if(tickT2 == 2){
-    curTimer = 1;
-  }
+  switch (state) {
+    case 0: // period one, on
+    outputState = 1;
 
-  // turn on signal
-  // care ab timer 1
-  // if tmr 1 off, turn light off
+    if (timer1occured){
+      state = 1;
 
-  // care ab timer 2
-  // when tmr 2 ends, care ab timer 2 again
-  // turn on the led
-  // when tmr 2 ends, turn off led
-  // care ab timer 1
-  // when timer 1 is over, turn light on 
+      // about to start counting using timer 2, so reset the count value now
+      GPT2_CNT = 0;
+      timer1occured = 0;
+    }
+    break;
+
+    case 1: // period one, off
+    outputState =0;
+
+    if (timer2occured){
+      state = 2;
+      // about to start counting using timer 2, so reset the count value now
+      GPT2_CNT = 0;
+      timer2occured = 0;
+    }
+    
+
+    break;
+
+    case 2: // period two, on
+
+    outputState = 1;
+
+    if (timer2occured){
+      state = 3;
+
+      // about to start counting using timer 2, so reset the count value now
+      GPT1_CNT = 0;
+      timer2occured = 0;
+    }
+
+    case 3: // period two, off
+
+    outputState = 0;
+
+    if (timer1occured){
+
+      state = 0;
+
+      // about to start counting using timer 1, so reset the count value now
+      GPT1_CNT = 0;
+      timer1occured = 0;
+
+    }
+
+  }
 }
 
 
 
 void gpt1_isr() {
+  timer1occured = 1;
   GPT1_SR |= GPT_SR_OF3;  // clear all set bits
-
-  tickT1 ++;
-
-  if (tickT1 > 2)
-    tickT1 = 0;
-
-  lastInterruptUsed = curInterruptUsed;
-  curInterruptUsed = 1;
-
-  if (lastInterruptUsed == curInterruptUsed)
-    digitalWrite(14, HIGH);
-  else
-    digitalWrite(14, LOW);
-  while (GPT1_SR & GPT_SR_OF1); // wait for clear
 }
 
 void gpt1_init(uint32_t us) {
-  CCM_CCGR1 |= CCM_CCGR1_GPT(CCM_CCGR_ON) ;  // enable GPT1 module
+  CCM_CCGR1 |= CCM_CCGR1_GPT(CCM_CCGR_ON);  // enable GPT1 module
   GPT1_CR = 0;
-  GPT1_PR = 23;   // prescale+1
+  GPT1_PR = 23;        // prescale+1
   GPT1_OCR1 = us - 1;  // compare
-  GPT1_SR = 0x3F; // clear all prior status
+  GPT1_SR = 0x3F;      // clear all prior status
   GPT1_IR = GPT_IR_OF1IE;
-  GPT1_CR = GPT_CR_EN | GPT_CR_CLKSRC(1) ;// 1 ipg 24mhz  4 32khz
+  GPT1_CR = GPT_CR_EN | GPT_CR_CLKSRC(1);  // 1 ipg 24mhz  4 32khz
   attachInterruptVector(IRQ_GPT1, gpt1_isr);
   NVIC_ENABLE_IRQ(IRQ_GPT1);
 }
 
 void gpt2_isr() {
   GPT2_SR |= GPT_SR_OF3;  // clear all set bits
-  lastInterruptUsed = curInterruptUsed;
-  curInterruptUsed = 2;
-
-  tickT2 ++;
-  if (tickT2 > 2)
-    tickT2 = 0;
-
-
-  if (lastInterruptUsed == curInterruptUsed)
-    digitalWrite(14, HIGH);
-  else
-    digitalWrite(14, LOW);
-
-  while (GPT2_SR & GPT_SR_OF1); // wait for clear
-  asm volatile ("dsb");
+  timer2occured = 1;
 }
 
 void gpt2_init(uint32_t us) {
-  CCM_CCGR0 |= CCM_CCGR0_GPT2_BUS(CCM_CCGR_ON) ;  // enable GPT2 module
+  CCM_CCGR0 |= CCM_CCGR0_GPT2_BUS(CCM_CCGR_ON);  // enable GPT2 module
   GPT2_CR = 0;
-  GPT2_PR = 23;   // prescale+1
+  GPT2_PR = 23;        // prescale+1
   GPT2_OCR1 = us - 1;  // compare
-  GPT2_SR = 0x3F; // clear all prior status
+  GPT2_SR = 0x3F;      // clear all prior status
   GPT2_IR = GPT_IR_OF1IE;
-  GPT2_CR = GPT_CR_EN | GPT_CR_CLKSRC(1) ;// 1 ipg 24mhz  4 32khz
+  GPT2_CR = GPT_CR_EN | GPT_CR_CLKSRC(1);  // 1 ipg 24mhz  4 32khz
   attachInterruptVector(IRQ_GPT2, gpt2_isr);
   NVIC_ENABLE_IRQ(IRQ_GPT2);
 }
