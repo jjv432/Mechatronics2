@@ -25,8 +25,6 @@ void loop() {
 
       if (timer1occured) {
         state = 1;
-
-        // about to start counting using timer 2, so reset the count value now
         reset_cnts();
       }
       break;
@@ -36,8 +34,6 @@ void loop() {
 
       if (timer2occured) {
         state = 2;
-
-        // about to start counting using timer 2, so reset the count value now
         reset_cnts();
       }
       break;
@@ -47,8 +43,6 @@ void loop() {
 
       if (timer2occured) {
         state = 3;
-
-        // about to start counting using timer 2, so reset the count value now
         reset_cnts();
       }
       break;
@@ -58,8 +52,6 @@ void loop() {
 
       if (timer1occured) {
         state = 0;
-
-        // about to start counting using timer 1, so reset the count value now
         reset_cnts();
       }
       break;
@@ -67,7 +59,7 @@ void loop() {
 }
 
 void reset_cnts(){
-  GPT1_OCR1 = t1;
+  GPT1_OCR1 = t1; // writing to OCR1 forces cnt to 0
   GPT2_OCR1 = t2;
   timer1occured = 0;
   timer2occured = 0;
