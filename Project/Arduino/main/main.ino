@@ -1,16 +1,25 @@
-#include "libs/Morse.h"
+#include "src/myStepper/myStepper.h"  // doing it like this so git will keep up
 
-Morse morse(13);
+myStepper mS(1, 3, 2, 4);
+int desPos = 1000;
 
-void setup()
-{
-  morse.begin();
+void setup() {
+
+  mS.init();
 }
 
-void loop()
-{
-  morse.dot(); morse.dot(); morse.dot();
-  morse.dash(); morse.dash(); morse.dash();
-  morse.dot(); morse.dot(); morse.dot();
-  delay(3000);
+void loop() {
+  // Simple test: move back and forth between two positions
+  desPos = 200;
+   while (mS._curPos != desPos) {
+    mS.goToDesPos(desPos);  // Move toward position 10
+  }
+
+  desPos = 0;
+
+  while (mS._curPos != desPos) {
+    mS.goToDesPos(desPos);  // Move toward position 10
+  }
+
+
 }
