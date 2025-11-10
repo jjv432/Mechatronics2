@@ -17,7 +17,13 @@
 myDCEncoder motorA(motorA_IN1, motorA_IN2, motorA_EN, motorA_chA, motorA_chB);
 
 myStepper mS(stepperIN1, stepperIN3, stepperIN2, stepperIN4);
-int desPos = 400;
+
+int desPos1 = 400;
+int desPos2 = -400; // roughly 180 degrees
+int desPos = desPos1;
+
+int direction = 1;
+bool state = 0;
 
 void setup() {
 
@@ -32,21 +38,28 @@ void setup() {
 }
 
 void loop() {
+  
+  switch (state){
+    case 0: 
+    if (abs(motorA._curPos - desPos1) < 8){
+      state = !state;
+      desPos = desPos2;
+    }
+    break;
+
+    case 1: 
+    if (abs(motorA._curPos - desPos2) < 8){
+      state = !state;
+      desPos = desPos1;
+    }
+    break;
+
+    
+  }
 
   motorA.PID(desPos);
 
   Serial.println(motorA._curPos);
-  // Simple test: move back and forth between two positions
-  // desPos = 200;
-  // while (mS._curPos != desPos) {
-  //   mS.goToDesPos(desPos);  // Move toward position 10
-  // }
-
-  // desPos = 0;
-
-  // while (mS._curPos != desPos) {
-  //   mS.goToDesPos(desPos);  // Move toward position 10
-  // }
 }
 
 void ISR_motorA_chA() {

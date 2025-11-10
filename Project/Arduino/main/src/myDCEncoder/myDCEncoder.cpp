@@ -46,9 +46,11 @@ void myDCEncoder::driveMotor(int PWM){
 void myDCEncoder::PID(int desPos){
 	// desPos will be determined as a function of compression when using the hall effect. It's useful to have a baseline PID function, though
 	// REMEMBER CURPOS IS IN "TICKS"
-	static unsigned int last_p_error = 0;
+	static  int last_p_error = 0;
 	static unsigned int last_time = millis();
-	static unsigned int i_error = 0; // integral of error
+	static float i_error = 0; // integral of error
+	static int stationaryCounter = 0;
+	static int lastStationaryPosition = 0;
 
 	// get timing info
 	int now = millis();
@@ -56,21 +58,44 @@ void myDCEncoder::PID(int desPos){
 
 	// find errors
 	int p_error = desPos - _curPos;							// P
-	float d_error = (p_error - last_p_error) / dt;			// D
-	i_error += p_error * dt;								// I
+	float d_error = (last_p_error - p_error) / dt;			// D
+	i_error += -p_error * dt / 1000.;		 				// I
 
 	// reset for next time
 	last_p_error = p_error;
 	last_time = now;
 
 	// Calculate commanded PWM (speed)
-	// float PwmCommand = _kp * p_error + _kd * d_error + _ki * i_error;
-	float PwmCommand = _kp * p_error;	
+	float PwmCommand = _kp * p_error + _kd * d_error + _ki * i_error;
 
 	if (PwmCommand > 255){
 		PwmCommand = 255;
 	}
+	else if (PwmCommand < -255){
+		PwmCommand = -255;
+	}
+
 	
+	// increment if you've been stationary
+	if (abs(p_error) <= 1){
+		stationaryCounter ++;
+	}
+	else{
+		stationaryCounter = 0;
+	}
+
+	// flush integral error if you've been stationary for a while
+	if (stationaryCounter >= 15){
+		i_error = 0;
+		lastStationaryPosition = desPos;
+		// in case desPos changes, reset all of this logic
+		if (desPos != lastStationaryPosition){
+			stationaryCounter = 0;
+		}
+	}
+
+
+
 	myDCEncoder::driveMotor(PwmCommand);
 
 }
