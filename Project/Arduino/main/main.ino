@@ -3,27 +3,29 @@
 
 // Change this so that all these pins are definitions up top
 // Two encoders
-myDCEncoder leftMotor(5, 6, 9, 2, 3);
+#define motorA_IN1 5
+#define motorA_IN2 6
+#define motorA_EN 9 // pwm pin
+#define motorA_chA 2 // encoder
+#define motorA_chB 3 // encoder
 
-// Global ISR wrappers
-void ISR_leftA() {
-  leftMotor.updateCurState();
-}
-void ISR_leftB() {
-  leftMotor.updateCurState();
-}
+#define stepperIN1 40
+#define stepperIN2 41
+#define stepperIN3 42
+#define stepperIN4 43
 
+myDCEncoder motorA(motorA_IN1, motorA_IN2, motorA_EN, motorA_chA, motorA_chB);
 
-myStepper mS(1, 3, 2, 4);
+myStepper mS(stepperIN1, stepperIN3, stepperIN2, stepperIN4);
 int desPos = 1000;
 
 void setup() {
 
   mS.init();
-  leftMotor.init();
+  motorA.init();
 
-  attachInterrupt(digitalPinToInterrupt(2), ISR_leftA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(3), ISR_leftB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(motorA_chA), ISR_motorA_chA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(motorA_chB), ISR_motorA_chB, CHANGE);
 
 }
 
@@ -39,4 +41,11 @@ void loop() {
   while (mS._curPos != desPos) {
     mS.goToDesPos(desPos);  // Move toward position 10
   }
+}
+
+void ISR_motorA_chA() {
+  motorA.updateCurState();
+}
+void ISR_motorA_chB() {
+  motorA.updateCurState();
 }
