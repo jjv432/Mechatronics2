@@ -1,12 +1,12 @@
-#ifndef myStepper_h
-#define myStepper_h
+#ifndef myDCEncoder_h
+#define myDCEncoder_h
 
 #include "Arduino.h"
 
-class myStepper
+class myDCEncoder
 {
   public:
-    myStepper(int direction_pin, int ch_a, int ch_b, int ch_c, int ch_d);
+    myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int ch_c, int ch_d);
     void init();
     void driveMotor(int PWM);
     void PID(int desPos);
@@ -17,14 +17,15 @@ class myStepper
     float _ki = 1.0;
     float _kd = 1.0;
   private:
-    void ISR_0();
-    void ISR_1();
-    void ISR_2();
-    void ISR_3();
+    static myDCEncoder* _instances[4];  // static lookup table
+    static void ISR_0();
+    static void ISR_1();
+    static void ISR_2();
+    static void ISR_3();
     int _IN_1;
     int _IN_2;
     int _EN;
-    int[4] _input_ch;
+    int _input_ch[4];
 };
 
 #endif

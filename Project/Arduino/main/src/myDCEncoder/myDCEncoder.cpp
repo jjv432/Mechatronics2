@@ -1,6 +1,9 @@
 # include "Arduino.h"
 # include "myDCEncoder.h"
 
+// Static array initialization
+myDCEncoder* myDCEncoder::_instances[4] = {nullptr, nullptr, nullptr, nullptr};
+
 myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int ch_c, int ch_d)
 {
 	_IN_1 = IN_1;
@@ -22,6 +25,7 @@ void myDCEncoder::init() {
 	// Make all the encoder pins inputs
 	for (int i = 0; i <4; i++){
 		pinMode(_input_ch[i], INPUT_PULLUP);
+		_instances[i] = this; // register this encoder for that channel
 	}
 
 	// attach the encoder pins to corresponding interrupts
@@ -54,13 +58,13 @@ void myDCEncoder::PID(int desPos){
 	static unsigned int i_error = 0; // integral of error
 
 	// get timing info
-	now = millis();
+	int now = millis();
 	int dt = now - last_time;
 
 	// find errors
-	unsigned int p_error = _curPos - desPos;						// P
-	unsigned float d_error = (p_error - last_p_error) / dt;			// D
-	i_error += p_error * dt;										// I
+	unsigned int p_error = _curPos - desPos;				// P
+	float d_error = (p_error - last_p_error) / dt;			// D
+	i_error += p_error * dt;								// I
 
 	// reset for next time
 	last_p_error = p_error;
@@ -75,18 +79,10 @@ void myDCEncoder::PID(int desPos){
 
 
 // ISRs for updating the current position
-void ISR_0(){
-	myDCEncoder::updateCurState(0);
-}
-void ISR_1(){
-	myDCEncoder::updateCurState(1);
-}
-void ISR_2(){
-	myDCEncoder::updateCurState(2);
-}
-void ISR_3(){
-	myDCEncoder::updateCurState(3);
-}
+void myDCEncoder::ISR_0() { if (_instances[0]) _instances[0]->updateCurState(0); }
+void myDCEncoder::ISR_1() { if (_instances[1]) _instances[1]->updateCurState(1); }
+void myDCEncoder::ISR_2() { if (_instances[2]) _instances[2]->updateCurState(2); }
+void myDCEncoder::ISR_3() { if (_instances[3]) _instances[3]->updateCurState(3); }
 
 // Function called by the ISRs to update the current position of the motor
 void myDCEncoder::updateCurState(int channelNumber){
@@ -95,8 +91,8 @@ void myDCEncoder::updateCurState(int channelNumber){
 	static int lastTime = millis();
 	const float resolution = .5; // how many degrees per phase of the encoder
 	
-	curTime = millis();
-	dt = millis() - lastTime;
+	int curTime = millis();
+	int dt = millis() - lastTime;
 	lastTime = curTime;
 
 	// this is arbitrary, but imagine it goes:  0, 1, 2, 3 clockwise
