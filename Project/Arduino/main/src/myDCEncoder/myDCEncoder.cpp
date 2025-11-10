@@ -70,14 +70,17 @@ void myDCEncoder::PID(int desPos){
 
 }
 
+void myDCEncoder::ticksToDeg(){
 
+}
+
+//* INCLUDE CONVERSION TO DEGREES IN HERE!
 // Function called by the ISRs to update the current position of the motor
 void myDCEncoder::updateCurState(){
 	// an interrupt in the main script will call this. Based on the last channel that was interrupted, you'll know which direction you spun
 	static int lastState = 0;
 	int curState = 0;
 	static int lastTime = millis();
-	const float resolution = .5; // how many degrees per phase of the encoder
 	
 	int curTime = millis();
 	int dt = millis() - lastTime;
@@ -104,11 +107,11 @@ void myDCEncoder::updateCurState(){
 		case 0:
 		if (lastState == 3){
 			_curPos ++;
-			_curOmega = resolution/dt;
+			_curOmega = 1/dt;
 		}
 		else if (lastState == 1){
 			_curPos --;
-			_curOmega = -resolution/dt;
+			_curOmega = -1/dt;
 		}
 		else if (lastState == 0){
 			_curOmega = 0;
@@ -118,11 +121,11 @@ void myDCEncoder::updateCurState(){
 		case 1:
 		if (lastState == 0){
 			_curPos ++;
-			_curOmega = resolution/dt;
+			_curOmega = 1/dt;
 		}
 		else if (lastState == 2){
 			_curPos --;
-			_curOmega = -resolution/dt;
+			_curOmega = -1/dt;
 		}
 		else if (lastState == 1){
 			_curOmega = 0;
@@ -132,11 +135,11 @@ void myDCEncoder::updateCurState(){
 		case 2:
 		if (lastState == 1){
 			_curPos ++;
-			_curOmega = resolution/dt;
+			_curOmega = 1/dt;
 		}
 		else if (lastState == 3){
 			_curPos --;
-			_curOmega = -resolution/dt;
+			_curOmega = -1/dt;
 		}
 		else if (lastState == 2){
 			_curOmega = 0;
@@ -146,11 +149,11 @@ void myDCEncoder::updateCurState(){
 		case 3:
 		if (lastState == 2){
 			_curPos ++;
-			_curOmega = resolution/dt;
+			_curOmega = 1/dt;
 		}
 		else if (lastState == 0){
 			_curPos --;
-			_curOmega = -resolution/dt;
+			_curOmega = -1/dt;
 		}
 		else if (lastState == 3){
 			_curOmega = 0;

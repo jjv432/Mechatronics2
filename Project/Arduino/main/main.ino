@@ -27,20 +27,23 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(motorA_chA), ISR_motorA_chA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(motorA_chB), ISR_motorA_chB, CHANGE);
 
+  Serial.begin(9600);
 }
 
 void loop() {
+
+  Serial.println(motorA._curPos);
   // Simple test: move back and forth between two positions
-  desPos = 200;
-  while (mS._curPos != desPos) {
-    mS.goToDesPos(desPos);  // Move toward position 10
-  }
+  // desPos = 200;
+  // while (mS._curPos != desPos) {
+  //   mS.goToDesPos(desPos);  // Move toward position 10
+  // }
 
-  desPos = 0;
+  // desPos = 0;
 
-  while (mS._curPos != desPos) {
-    mS.goToDesPos(desPos);  // Move toward position 10
-  }
+  // while (mS._curPos != desPos) {
+  //   mS.goToDesPos(desPos);  // Move toward position 10
+  // }
 }
 
 void ISR_motorA_chA() {
