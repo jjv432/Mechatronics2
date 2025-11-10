@@ -1,10 +1,11 @@
 # include "Arduino.h"
 # include "myDCEncoder.h"
 
-// Static array initialization
-myDCEncoder* myDCEncoder::_instances[4] = {nullptr, nullptr, nullptr, nullptr};
+// This is a weird quirk of c++ and attachInterrupt
+// Global static lookup for all encoder pins
+myDCEncoder* encoder_lookup[NUM_DIGITAL_PINS] = {nullptr};
 
-myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int ch_c, int ch_d)
+myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b)
 {
 	_IN_1 = IN_1;
 	_IN_2 = IN_2;
@@ -12,10 +13,9 @@ myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int ch_
 
 	_input_ch[0] = ch_a;
 	_input_ch[1] = ch_b;
-	_input_ch[2] = ch_c;
-	_input_ch[3] = ch_d;
 
 }
+
 
 void myDCEncoder::init() {
 	// Make IN1 and IN2 output pins
@@ -23,16 +23,9 @@ void myDCEncoder::init() {
 	pinMode(_IN_2, OUTPUT);
 
 	// Make all the encoder pins inputs
-	for (int i = 0; i <4; i++){
-		pinMode(_input_ch[i], INPUT_PULLUP);
-		_instances[i] = this; // register this encoder for that channel
+	for (int i = 0; i < 2; i++) {
+    pinMode(_input_ch[i], INPUT_PULLUP);
 	}
-
-	// attach the encoder pins to corresponding interrupts
-	attachInterrupt(digitalPinToInterrupt(_input_ch[0]), myDCEncoder::ISR_0, RISING);
-	attachInterrupt(digitalPinToInterrupt(_input_ch[1]), myDCEncoder::ISR_1, RISING);
-	attachInterrupt(digitalPinToInterrupt(_input_ch[2]), myDCEncoder::ISR_2, RISING);
-	attachInterrupt(digitalPinToInterrupt(_input_ch[3]), myDCEncoder::ISR_3, RISING);
 }
 
 void myDCEncoder::driveMotor(int PWM){
@@ -78,16 +71,11 @@ void myDCEncoder::PID(int desPos){
 }
 
 
-// ISRs for updating the current position
-void myDCEncoder::ISR_0() { if (_instances[0]) _instances[0]->updateCurState(0); }
-void myDCEncoder::ISR_1() { if (_instances[1]) _instances[1]->updateCurState(1); }
-void myDCEncoder::ISR_2() { if (_instances[2]) _instances[2]->updateCurState(2); }
-void myDCEncoder::ISR_3() { if (_instances[3]) _instances[3]->updateCurState(3); }
-
 // Function called by the ISRs to update the current position of the motor
-void myDCEncoder::updateCurState(int channelNumber){
+void myDCEncoder::updateCurState(){
 	// an interrupt in the main script will call this. Based on the last channel that was interrupted, you'll know which direction you spun
-	static int lastChannelNumber = 0;
+	static int lastState = 0;
+	int curState = 0;
 	static int lastTime = millis();
 	const float resolution = .5; // how many degrees per phase of the encoder
 	
@@ -95,63 +83,80 @@ void myDCEncoder::updateCurState(int channelNumber){
 	int dt = millis() - lastTime;
 	lastTime = curTime;
 
-	// this is arbitrary, but imagine it goes:  0, 1, 2, 3 clockwise
-	switch (channelNumber){
+	bool a = digitalRead(_input_ch[0]);
+	bool b = digitalRead(_input_ch[1]);
+	
+	if (!a&&!b){
+		curState = 0;
+	}
+	else if(a&&!b){
+		curState = 1;
+	}
+	else if(a&&b){
+		curState = 2;
+	}
+	else if(!a&&b){
+		curState = 3;
+	}
+	
+	// cw is 0, 1, 2, 3
+	switch (curState){
 		case 0:
-		if (lastChannelNumber == 3){
+		if (lastState == 3){
 			_curPos ++;
 			_curOmega = resolution/dt;
 		}
-		else if (lastChannelNumber == 1){
+		else if (lastState == 1){
 			_curPos --;
 			_curOmega = -resolution/dt;
 		}
-		else if (lastChannelNumber == 0){
+		else if (lastState == 0){
 			_curOmega = 0;
 		}
 		break;
 
 		case 1:
-		if (lastChannelNumber == 0){
+		if (lastState == 0){
 			_curPos ++;
 			_curOmega = resolution/dt;
 		}
-		else if (lastChannelNumber == 2){
+		else if (lastState == 2){
 			_curPos --;
 			_curOmega = -resolution/dt;
 		}
-		else if (lastChannelNumber == 1){
+		else if (lastState == 1){
 			_curOmega = 0;
 		}
 		break;
 
 		case 2:
-		if (lastChannelNumber == 1){
+		if (lastState == 1){
 			_curPos ++;
 			_curOmega = resolution/dt;
 		}
-		else if (lastChannelNumber == 3){
+		else if (lastState == 3){
 			_curPos --;
 			_curOmega = -resolution/dt;
 		}
-		else if (lastChannelNumber == 2){
+		else if (lastState == 2){
 			_curOmega = 0;
 		}
 		break;
 
 		case 3:
-		if (lastChannelNumber == 2){
+		if (lastState == 2){
 			_curPos ++;
 			_curOmega = resolution/dt;
 		}
-		else if (lastChannelNumber == 0){
+		else if (lastState == 0){
 			_curPos --;
 			_curOmega = -resolution/dt;
 		}
-		else if (lastChannelNumber == 3){
+		else if (lastState == 3){
 			_curOmega = 0;
 		}
 		break;
 	}
 
+	lastState = curState;
 }
