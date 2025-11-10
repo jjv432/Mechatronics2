@@ -14,7 +14,7 @@ class myDCEncoder
     void ticksToDeg();
     int _curPos = 0; // in "ticks"
     int _curOmega = 0; // in tick/s
-    float _kp = 1.0;
+    float _kp = 100.0;
     float _ki = 1.0;
     float _kd = 1.0;
   private:

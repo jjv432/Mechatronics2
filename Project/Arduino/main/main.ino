@@ -5,9 +5,9 @@
 // Two encoders
 #define motorA_IN1 5
 #define motorA_IN2 6
-#define motorA_EN 9 // pwm pin
-#define motorA_chA 2 // encoder
-#define motorA_chB 3 // encoder
+#define motorA_EN 9   // pwm pin
+#define motorA_chA 2  // encoder
+#define motorA_chB 3  // encoder
 
 #define stepperIN1 40
 #define stepperIN2 41
@@ -17,7 +17,7 @@
 myDCEncoder motorA(motorA_IN1, motorA_IN2, motorA_EN, motorA_chA, motorA_chB);
 
 myStepper mS(stepperIN1, stepperIN3, stepperIN2, stepperIN4);
-int desPos = 1000;
+int desPos = 400;
 
 void setup() {
 
@@ -28,9 +28,12 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(motorA_chB), ISR_motorA_chB, CHANGE);
 
   Serial.begin(9600);
+  delay(2000);
 }
 
 void loop() {
+
+  motorA.PID(desPos);
 
   Serial.println(motorA._curPos);
   // Simple test: move back and forth between two positions

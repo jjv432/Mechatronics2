@@ -55,7 +55,7 @@ void myDCEncoder::PID(int desPos){
 	int dt = now - last_time;
 
 	// find errors
-	unsigned int p_error = _curPos - desPos;				// P
+	int p_error = desPos - _curPos;							// P
 	float d_error = (p_error - last_p_error) / dt;			// D
 	i_error += p_error * dt;								// I
 
@@ -64,8 +64,13 @@ void myDCEncoder::PID(int desPos){
 	last_time = now;
 
 	// Calculate commanded PWM (speed)
-	float PwmCommand = _kp * p_error + _kd * d_error + _ki * i_error;
+	// float PwmCommand = _kp * p_error + _kd * d_error + _ki * i_error;
+	float PwmCommand = _kp * p_error;	
 
+	if (PwmCommand > 255){
+		PwmCommand = 255;
+	}
+	
 	myDCEncoder::driveMotor(PwmCommand);
 
 }
