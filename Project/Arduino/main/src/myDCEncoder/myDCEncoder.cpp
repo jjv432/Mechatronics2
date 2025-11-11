@@ -12,7 +12,6 @@ myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b)
 
 }
 
-
 void myDCEncoder::init() {
 	// Make IN1 and IN2 output pins
 	pinMode(_IN_1, OUTPUT);
@@ -49,8 +48,9 @@ void myDCEncoder::PID(int desPos){
 	static int lastStationaryPosition = 0;
 
 	// get timing info
-	int now = millis();
-	int dt = now - last_time;
+	unsigned int now = millis();
+	unsigned int dt = now - last_time;
+	last_time = now;
 
 	// find errors
 	int p_error = desPos - _curPos;							// P
@@ -58,8 +58,7 @@ void myDCEncoder::PID(int desPos){
 	i_error += -p_error * dt / 1000.;		 				// I
 
 	// reset for next time
-	last_p_error = p_error;
-	last_time = now;
+	last_p_error = p_error;	
 
 	// Calculate commanded PWM (speed)
 	float PwmCommand = _kp * p_error + _kd * d_error + _ki * i_error;
@@ -70,7 +69,6 @@ void myDCEncoder::PID(int desPos){
 	else if (PwmCommand < -255){
 		PwmCommand = -255;
 	}
-
 	
 	// increment if you've been stationary
 	if (abs(p_error) <= 1){
@@ -90,8 +88,6 @@ void myDCEncoder::PID(int desPos){
 		}
 	}
 
-
-
 	myDCEncoder::driveMotor(PwmCommand);
 
 }
@@ -100,92 +96,104 @@ void myDCEncoder::ticksToDeg(){
 
 }
 
-//* INCLUDE CONVERSION TO DEGREES IN HERE!
+
 // Function called by the ISRs to update the current position of the motor
 void myDCEncoder::updateCurState(){
 	// an interrupt in the main script will call this. Based on the last channel that was interrupted, you'll know which direction you spun
-	static int lastState = 0;
-	int curState = 0;
-	static int lastTime = millis();
 	
-	int curTime = millis();
-	int dt = curTime - lastTime;
-	lastTime = curTime;
-
+	// read both channels of the encoder
 	bool a = digitalRead(_input_ch[0]);
 	bool b = digitalRead(_input_ch[1]);
-	
+
+	// update state info
+	_lastState = _curState;
+
+	// logic based on behavior of the enoder. See spec sheet 
 	if (!a&&!b){
-		curState = 0;
+		_curState = 0;
 	}
 	else if(a&&!b){
-		curState = 1;
+		_curState = 1;
 	}
 	else if(a&&b){
-		curState = 2;
+		_curState = 2;
 	}
 	else if(!a&&b){
-		curState = 3;
+		_curState = 3;
 	}
 	
+	myDCEncoder::updateCurPos();
+}
+
+// splitting this from the updateCurState is useful bc:
+// at a minimum, can help increase readability
+// if the interrupt is found to be taking too long (hasn't yet), a flag can be set in updateCurState which will be handled by
+// updateCurPos. If the flag is true, run updateCurPos and set the flag to false
+void myDCEncoder::updateCurPos(){
+
+	// organize time data
+	static unsigned int lastTime = millis();
+	unsigned int curTime = millis();
+	unsigned int dt = curTime - lastTime;
+	lastTime = curTime;
+
 	// cw is 0, 1, 2, 3
-	switch (curState){
+	switch (_curState){
 		case 0:
-		if (lastState == 3){
+		if (_lastState == 3){
 			_curPos ++;
 			_curOmega = 1/dt;
 		}
-		else if (lastState == 1){
+		else if (_lastState == 1){
 			_curPos --;
 			_curOmega = -1/dt;
 		}
-		else if (lastState == 0){
+		else if (_lastState == 0){
 			_curOmega = 0;
 		}
 		break;
 
 		case 1:
-		if (lastState == 0){
+		if (_lastState == 0){
 			_curPos ++;
 			_curOmega = 1/dt;
 		}
-		else if (lastState == 2){
+		else if (_lastState == 2){
 			_curPos --;
 			_curOmega = -1/dt;
 		}
-		else if (lastState == 1){
+		else if (_lastState == 1){
 			_curOmega = 0;
 		}
 		break;
 
 		case 2:
-		if (lastState == 1){
+		if (_lastState == 1){
 			_curPos ++;
 			_curOmega = 1/dt;
 		}
-		else if (lastState == 3){
+		else if (_lastState == 3){
 			_curPos --;
 			_curOmega = -1/dt;
 		}
-		else if (lastState == 2){
+		else if (_lastState == 2){
 			_curOmega = 0;
 		}
 		break;
 
 		case 3:
-		if (lastState == 2){
+		if (_lastState == 2){
 			_curPos ++;
 			_curOmega = 1/dt;
 		}
-		else if (lastState == 0){
+		else if (_lastState == 0){
 			_curPos --;
 			_curOmega = -1/dt;
 		}
-		else if (lastState == 3){
+		else if (_lastState == 3){
 			_curOmega = 0;
 		}
 		break;
 	}
 
-	lastState = curState;
 }
