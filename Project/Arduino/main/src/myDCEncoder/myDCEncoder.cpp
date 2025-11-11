@@ -1,10 +1,6 @@
 # include "Arduino.h"
 # include "myDCEncoder.h"
 
-// This is a weird quirk of c++ and attachInterrupt
-// Global static lookup for all encoder pins
-myDCEncoder* encoder_lookup[NUM_DIGITAL_PINS] = {nullptr};
-
 myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b)
 {
 	_IN_1 = IN_1;
@@ -113,7 +109,7 @@ void myDCEncoder::updateCurState(){
 	static int lastTime = millis();
 	
 	int curTime = millis();
-	int dt = millis() - lastTime;
+	int dt = curTime - lastTime;
 	lastTime = curTime;
 
 	bool a = digitalRead(_input_ch[0]);
