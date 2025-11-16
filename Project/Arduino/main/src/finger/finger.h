@@ -7,6 +7,8 @@ class finger {
 public:
   finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
                          int hallEffectPin, float minHallEffectReadingG, float maxHallEffectReadingG);
+
+  // methods
   void init();
   void driveMotor(int PWM);
   void updateCurState();
@@ -16,6 +18,10 @@ public:
   void releaseMotor();
   void calibrateMotor();
   void readHallEffect();
+  void touchObject();
+  unsigned int getHallEffectCompression();
+
+  // properties
   int _curPos = 0;   // in "ticks";
   int _curOmega = 0; // in tick/ms;
   float _kp = 10.0;
@@ -31,7 +37,10 @@ public:
   float _maxHallEffectReadingG = -400;
 
 private:
+  // methods
   void updateCurPos();
+
+  // properties
   int _curState = 0;
   int _lastState = 0;
   bool _calibrated = 0;

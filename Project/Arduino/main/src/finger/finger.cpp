@@ -73,7 +73,7 @@ void finger::PID(int desPos) {
   // find errors
   int p_error = desPos - _curPos;                // P;
   float d_error = (last_p_error - p_error) / dt; // D;
-  i_error += -p_error * dt;                      // I;
+  i_error -= p_error * dt;                      // I;
 
   // reset for next time
   last_p_error = p_error;
