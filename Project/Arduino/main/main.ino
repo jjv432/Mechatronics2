@@ -1,4 +1,4 @@
-#include "src/myStepper/myStepper.h"      // doing it like this so git will keep up
+#include "src/finger/finger.h"      // doing it like this so git will keep up
 #include "src/myDCEncoder/myDCEncoder.h"  // doing it like this so git will keep up
 
 // Change this so that all these pins are definitions up top
@@ -13,8 +13,9 @@
 #define stepperIN2 41
 #define stepperIN3 42
 #define stepperIN4 43
+#define hallEffectPin A2
 
-myDCEncoder motorA(motorA_IN1, motorA_IN2, motorA_EN, motorA_chA, motorA_chB);
+finger motorA(motorA_IN1, motorA_IN2, motorA_EN, motorA_chA, motorA_chB, hallEffectPin);
 
 myStepper mS(stepperIN1, stepperIN3, stepperIN2, stepperIN4);
 
@@ -38,28 +39,29 @@ void setup() {
 }
 
 void loop() {
-  
-  switch (state){
-    case 0: 
-    if (abs(motorA._curPos - desPos1) < 8){
-      state = !state;
-      desPos = desPos2;
-    }
-    break;
+  motorA.readHallEffect();
+  Serial.println(motorA._hallEffectReadingG);
+  // switch (state){
+  //   case 0: 
+  //   if (abs(motorA._curPos - desPos1) < 8){
+  //     state = !state;
+  //     desPos = desPos2;
+  //   }
+  //   break;
 
-    case 1: 
-    if (abs(motorA._curPos - desPos2) < 8){
-      state = !state;
-      desPos = desPos1;
-    }
-    break;
+  //   case 1: 
+  //   if (abs(motorA._curPos - desPos2) < 8){
+  //     state = !state;
+  //     desPos = desPos1;
+  //   }
+  //   break;
 
     
-  }
+  // }
 
-  motorA.PID(desPos);
+  // motorA.PID(desPos);
 
-  Serial.println(motorA._curPos);
+  // Serial.println(motorA._curPos);
 }
 
 void ISR_motorA_chA() {

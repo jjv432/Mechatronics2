@@ -1,12 +1,12 @@
-#ifndef myDCEncoder_h
-#define myDCEncoder_h
+#ifndef finger_h
+#define finger_h
 
 #include "Arduino.h"
 
-class myDCEncoder {
+class finger {
 public:
-  myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
-              int hallEffectPin);
+  finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
+                         int hallEffectPin, float minHallEffectReadingG, float maxHallEffectReadingG);
   void init();
   void driveMotor(int PWM);
   void updateCurState();
@@ -15,6 +15,7 @@ public:
   void stopMotor();
   void releaseMotor();
   void calibrateMotor();
+  void readHallEffect();
   int _curPos = 0;   // in "ticks";
   int _curOmega = 0; // in tick/ms;
   float _kp = 10.0;
@@ -24,8 +25,10 @@ public:
   int _IN_1;
   int _IN_2;
   int _hallEffectPin;
-  float _hallEffectReading;
-  float _hallEffectReadingG;
+  float _hallEffectReadingV;
+  float _hallEffectReadingG = -999;
+  float _minHallEffectReadingG = 0;
+  float _maxHallEffectReadingG = -400;
 
 private:
   void updateCurPos();

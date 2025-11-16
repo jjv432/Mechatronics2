@@ -1,12 +1,12 @@
-#include "myDCEncoder.h"
+#include "finger.h"
 #include "Arduino.h"
 
 /////////////////////////////////////////////////
 /////////////// CONSTRUCTOR, INIT////////////////
 /////////////////////////////////////////////////
 
-myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
-                         int hallEffectPin) {
+finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
+                         int hallEffectPin, float minHallEffectReadingG, float maxHallEffectReadingG) {
   _IN_1 = IN_1;
   _IN_2 = IN_2;
   _EN = EN;
@@ -15,9 +15,11 @@ myDCEncoder::myDCEncoder(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
   _input_ch[1] = ch_b;
 
   _hallEffectPin = hallEffectPin;
+  _minHallEffectReadingG = minHallEffectReadingG;
+  _maxHallEffectReadingG = maxHallEffectReadingG;
 }
 
-void myDCEncoder::init() {
+void finger::init() {
   // Make IN1 and IN2 output pins
   pinMode(_IN_1, OUTPUT);
   pinMode(_IN_2, OUTPUT);
@@ -35,7 +37,25 @@ void myDCEncoder::init() {
 ////////////// CONTROL  METHODS /////////////////
 /////////////////////////////////////////////////
 
-void myDCEncoder::PID(int desPos) {
+// drive forward until barely running into the object
+void finger::touchObject(){
+  static int setPoint = 0;
+  const int contactThreshold = 10; // percent;
+  const int PIDIncrement = 10;
+
+  int curCompression = finger::getHallEffectCompression();  
+  bool contactFlag = curCompression > contactThreshold;
+  
+  if (!contactFlag){
+    setPoint += PIDIncrement;
+    finger::PID(setPoint);
+  }
+  else
+    finger::stopMotor();
+    
+}
+
+void finger::PID(int desPos) {
   // desPos will be determined as a function of compression when using the hall
   // effect. It's useful to have a baseline PID function, though REMEMBER CURPOS
   // IS IN "TICKS"
@@ -84,24 +104,33 @@ void myDCEncoder::PID(int desPos) {
     }
   }
 
-  myDCEncoder::driveMotor(PwmCommand);
+  finger::driveMotor(PwmCommand);
 }
 
 /////////////////////////////////////////////////
 /////////// HALL EFFECT  METHODS ////////////////
 /////////////////////////////////////////////////
-void myDCEncoder::readHallEffect(){
-  _hallEffectReadingV = analogRead(hallPin0);
-  _hallEffectReadingG = (_hallEffectReading * _hallEffectResolution - _zeroField) / _hallEffectSensitivity;  // in Gauss;
+void finger::readHallEffect(){
+  _hallEffectReadingV = analogRead(_hallEffectPin);
+  _hallEffectReadingG = (_hallEffectReadingV * _hallEffectResolution - _zeroField) / _hallEffectSensitivity;  // in Gauss;
 }
 
+unsigned int finger::getHallEffectCompression(){
+  // map the compression to a percentage
+
+  // update the reading
+  finger::readHallEffect();
+
+  int readingPercentage = map(_hallEffectReadingG, _minHallEffectReadingG, _maxHallEffectReadingG, 0., 100.);
+  return readingPercentage;
+}
 
 
 /////////////////////////////////////////////////
 /////////////// MOTOR METHODS  //////////////////
 /////////////////////////////////////////////////
 
-void myDCEncoder::driveMotor(int PWM) {
+void finger::driveMotor(int PWM) {
 
   // Deal with switching directions
   if (PWM > 0) {
@@ -116,43 +145,41 @@ void myDCEncoder::driveMotor(int PWM) {
   analogWrite(_EN, abs(PWM));
 }
 
-void myDCEncoder::stopMotor(bool stop) {
-  if (stop) {
-    digitalWrite(_IN_1, HIGH);
-    digitalWrite(_IN_2, HIGH);
-  }
+void finger::stopMotor() {
+ 
+  digitalWrite(_IN_1, HIGH);
+  digitalWrite(_IN_2, HIGH);
+  
   analogWrite(_EN, 255);
 }
 
-void myDCEncoder::releaseMotor(bool release) {
-  if (release) {
-    digitalWrite(_IN_1, LOW);
-    digitalWrite(_IN_2, LOW);
-  }
+void finger::releaseMotor() {
+  
+  digitalWrite(_IN_1, LOW);
+  digitalWrite(_IN_2, LOW);
+  
   analogWrite(_EN, 0);
 }
 
-void myDCEncoder::calibrateMotor(bool start) {
+void finger::calibrateMotor() {
+  // let the linkage settle into zero position
+  finger::releaseMotor();
+  delay(1000);
 
-  if (start) {
-    // let the linkage settle into zero position
-    myDCEncoder::releaseMotor(true);
-    delay(1000);
-
-    // drive the motor a little bit to get it swinging
-    startTime = millis();
-    while (millis() - startTime < 1000) {
-      myDCEncoder::driveMotor(127);
-    }
-
-    // stop the motor, and let it settle again
-    myDCEncoder::releaseMotor(true);
-    delay(1000);
-
-    // set curPos to zero now that it has settled
-    _curPos = 0;
-    _calibrated = true;
+  // drive the motor a little bit to get it swinging
+  int startTime = millis();
+  while (millis() - startTime < 1000) {
+    finger::driveMotor(127);
   }
+
+  // stop the motor, and let it settle again
+  finger::releaseMotor();
+  delay(1000);
+
+  // set curPos to zero now that it has settled
+  _curPos = 0;
+  _calibrated = true;
+  
 }
 
 /////////////////////////////////////////////////
@@ -160,7 +187,7 @@ void myDCEncoder::calibrateMotor(bool start) {
 /////////////////////////////////////////////////
 
 // Function called by the ISRs to update the current position of the motor
-void myDCEncoder::updateCurState() {
+void finger::updateCurState() {
   // an interrupt in the main script will call this. Based on the last channel
   // that was interrupted, you'll know which direction you spun
 
@@ -182,7 +209,7 @@ void myDCEncoder::updateCurState() {
     _curState = 3;
   }
 
-  myDCEncoder::updateCurPos();
+  finger::updateCurPos();
 }
 
 // splitting this from the updateCurState is useful bc:
@@ -190,7 +217,7 @@ void myDCEncoder::updateCurState() {
 // if the interrupt is found to be taking too long (hasn't yet), a flag can be
 // set in updateCurState which will be handled by updateCurPos. If the flag is
 // true, run updateCurPos and set the flag to false
-void myDCEncoder::updateCurPos() {
+void finger::updateCurPos() {
 
   // organize time data
   static unsigned int lastTime = millis();
@@ -254,4 +281,4 @@ void myDCEncoder::updateCurPos() {
 /////////////// HELPER METHODS //////////////////
 /////////////////////////////////////////////////
 
-void myDCEncoder::ticksToDeg() {}
+void finger::ticksToDeg() {}
