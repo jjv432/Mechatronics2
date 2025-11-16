@@ -18,8 +18,9 @@ public:
   void releaseMotor();
   void calibrateMotor();
   void readHallEffect();
-  void touchObject();
+  bool touchObject();
   unsigned int getHallEffectCompression();
+  void graspObject(int desCompression);
 
   // properties
   int _curPos = 0;   // in "ticks";
@@ -35,6 +36,7 @@ public:
   float _hallEffectReadingG = -999;
   float _minHallEffectReadingG = 0;
   float _maxHallEffectReadingG = -400;
+  bool _PIDStationary = false;
 
 private:
   // methods

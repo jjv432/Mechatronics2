@@ -37,8 +37,29 @@ void finger::init() {
 ////////////// CONTROL  METHODS /////////////////
 /////////////////////////////////////////////////
 
+// grab the finger at a desired compression
+void finger::graspObject(int desCompression){
+  static int desPos = _curPos;
+  const int increment = 10;
+
+  // keep in bounds
+  desCompression = 100*(desCompression > 100) + desCompression*(desCompression <= 100);
+
+  int curCompression = finger::getHallEffectCompression();  
+
+  if (curCompression < desCompression){
+    desPos += increment;
+  }
+  else if (curCompression > desCompression){
+    desPos -= increment;
+  }
+
+  finger::PID(desPos);
+
+}
+
 // drive forward until barely running into the object
-void finger::touchObject(){
+bool finger::touchObject(){
   static int setPoint = 0;
   const int contactThreshold = 10; // percent;
   const int PIDIncrement = 10;
@@ -49,10 +70,12 @@ void finger::touchObject(){
   if (!contactFlag){
     setPoint += PIDIncrement;
     finger::PID(setPoint);
+    return false;
   }
-  else
+  else{
     finger::stopMotor();
-    
+    return true;
+  }    
 }
 
 void finger::PID(int desPos) {
@@ -98,13 +121,16 @@ void finger::PID(int desPos) {
   if (stationaryCounter >= 15) {
     i_error = 0;
     lastStationaryPosition = desPos;
+    finger::stopMotor(); // just hold the current position
+    _PIDStationary = true;
     // in case desPos changes, reset all of this logic
     if (desPos != lastStationaryPosition) {
       stationaryCounter = 0;
+      _PIDStationary = false;
     }
   }
-
-  finger::driveMotor(PwmCommand);
+  else
+    finger::driveMotor(PwmCommand);
 }
 
 /////////////////////////////////////////////////
