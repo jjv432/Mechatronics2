@@ -45,9 +45,7 @@ int state = 0;
 char curObject = 'U';
 
 void setup() {
-  attachInterrupt(digitalPinToInterrupt(fingerA_chA), ISR_fingerA_chA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(fingerA_chB), ISR_fingerA_chB, CHANGE);
-
+  
   fingerA.init();
   fingerB.init();
   fingerC.init();
@@ -77,13 +75,12 @@ void loop() {
       // if the object is unidentified
       if (curObject == 'U') {
         curObject = identifyObjectIR(IRPin);
-      }
-      else
+      } else
         state = 15;
 
       break;
 
-    case 15: // move the z
+    case 15:  // move the z
       // assuming this will be controlled externally
       //read the button
       if (readUIButton(buttonPin)) {
@@ -91,38 +88,38 @@ void loop() {
       }
       break;
 
-    case 20: // barely touch the object with each finger
+    case 20:  // barely touch the object with each finger
       bool aTouching = fingerA.touchObject();
       bool bTouching = fingerB.touchObject();
       bool cTouching = fingerC.touchObject();
 
-      if (aTouching && bTouching && cTouching){
+      if (aTouching && bTouching && cTouching) {
         state = 30;
       }
       break;
 
-    case 30: // fully grasp the object
-      const int graspCompression = 50; // percent
+    case 30:                            // fully grasp the object
+      const int graspCompression = 50;  // percent
 
       fingerA.graspObject(graspCompression);
       fingerB.graspObject(graspCompression);
       fingerC.graspObject(graspCompression);
 
       // if they've all got a stable grasp on the object...
-      if (fingerA._PIDStationary && fingerB._PIDStationary && fingerC._PIDStationary){
+      if (fingerA._PIDStationary && fingerB._PIDStationary && fingerC._PIDStationary) {
         state = 40;
       }
 
       break;
-    
-    case 40: // move the object to its drop location
+
+    case 40:  // move the object to its drop location
       if (readUIButton(buttonPin)) {
         state = 50;
       }
 
       break;
-    
-    case 50: // drop the object
+
+    case 50:  // drop the object
 
       // open all fingers
       fingerA.PID(0);
@@ -130,16 +127,8 @@ void loop() {
       fingerC.PID(0);
 
       // When they're all fully open
-      if (fingerA._PIDStationary && fingerB._PIDStationary && fingerC._PIDStationary){
+      if (fingerA._PIDStationary && fingerB._PIDStationary && fingerC._PIDStationary) {
         state = 0;
       }
   }
-}
-
-// bury this in the classes!
-void ISR_fingerA_chA() {
-  fingerA.updateCurState();
-}
-void ISR_fingerA_chB() {
-  fingerA.updateCurState();
 }

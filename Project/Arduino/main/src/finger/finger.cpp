@@ -5,6 +5,8 @@
 /////////////// CONSTRUCTOR, INIT////////////////
 /////////////////////////////////////////////////
 
+finger* finger::sFinger = 0;
+
 finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
                          int hallEffectPin, float minHallEffectReadingG, float maxHallEffectReadingG) {
   _IN_1 = IN_1;
@@ -17,6 +19,11 @@ finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
   _hallEffectPin = hallEffectPin;
   _minHallEffectReadingG = minHallEffectReadingG;
   _maxHallEffectReadingG = maxHallEffectReadingG;
+
+  sFinger = this;
+  attachInterrupt(digitalPinToInterrupt(ch_a), finger::updateISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ch_a), finger::updateISR, CHANGE);
+
 }
 
 void finger::init() {
@@ -212,6 +219,13 @@ void finger::calibrateMotor() {
 /////////////// ENCODER METHODS /////////////////
 /////////////////////////////////////////////////
 
+
+static void finger::updateISR(){
+  if (sFinger != 0){
+    sFinger->updateCurPos();
+  }
+
+}
 // Function called by the ISRs to update the current position of the motor
 void finger::updateCurState() {
   // an interrupt in the main script will call this. Based on the last channel
@@ -234,8 +248,6 @@ void finger::updateCurState() {
   } else if (!a && b) {
     _curState = 3;
   }
-
-  finger::updateCurPos();
 }
 
 // splitting this from the updateCurState is useful bc:

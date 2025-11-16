@@ -39,6 +39,9 @@ public:
   bool _PIDStationary = false;
 
 private:
+  static finger* sFinger;
+  static void updateISR();
+
   // methods
   void updateCurPos();
 
