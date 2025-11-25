@@ -55,13 +55,27 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(fingerA_chA), ISR_motorA_chA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(fingerA_chB), ISR_motorA_chB, CHANGE);
   Serial.begin(9600);
-
 }
 
+bool stateCalib = 0;
 // testing
 void loop(){
-  fingerA.PID(10);
-  // Serial.println(fingerA._curPos);
+
+  switch (stateCalib){
+    case 0: 
+      fingerA._calibrated = 0;
+      delay(1000);
+      stateCalib = 1;
+      break;
+    case 1:
+      fingerA.calibrateMotor();
+      break;
+  }
+  
+  // fingerA.PID(0);
+
+  Serial.println(fingerA._calibrated);
+  // Serial.println(fingerA._curOmega);
 
 }
 

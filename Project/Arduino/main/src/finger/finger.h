@@ -37,6 +37,7 @@ public:
   float _minHallEffectReadingG = 0;
   float _maxHallEffectReadingG = -400;
   bool _PIDStationary = false;
+  bool _calibrated = false;
 
 private:
   static void updateISR();
@@ -47,7 +48,7 @@ private:
   // properties
   int _curState = 0;
   int _lastState = 0;
-  bool _calibrated = 0;
+  
   float _hallEffectVCC = 5.0;
   float _zeroField = _hallEffectVCC / 2;
   float _hallEffectSensitivity = .001;

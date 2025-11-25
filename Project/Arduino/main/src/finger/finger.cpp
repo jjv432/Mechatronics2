@@ -189,23 +189,32 @@ void finger::releaseMotor() {
 }
 
 void finger::calibrateMotor() {
-  // let the linkage settle into zero position
-  finger::releaseMotor();
-  delay(1000);
 
-  // drive the motor a little bit to get it swinging
-  int startTime = millis();
-  while (millis() - startTime < 1000) {
-    finger::driveMotor(127);
-  }
+  static int lastPos = -999;
 
-  // stop the motor, and let it settle again
-  finger::releaseMotor();
-  delay(1000);
+  static int state = 0;
 
-  // set curPos to zero now that it has settled
-  _curPos = 0;
-  _calibrated = true;
+  switch(state){
+    // you just started calibrating
+    case 0:
+      finger::driveMotor(200);
+      if (_curPos > 5){
+        state = 1;
+      }
+      break;
+    // now, omega has started to update and you can rely on it
+    case 1: 
+      finger::driveMotor(200);
+      if (_curOmega == 0){
+        state = 2;
+      }
+      lastPos = _curPos;
+      break;
+    case 2:
+      _calibrated = true;
+      finger::releaseMotor();
+      break;
+  }  
   
 }
 
