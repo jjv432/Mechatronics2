@@ -2,28 +2,28 @@
 #include "src/functions.h"
 
 // finger A
-#define fingerA_IN1 1
-#define fingerA_IN2 2
-#define fingerA_EN 3   // pwm pin
-#define fingerA_chA 4  // encoder
-#define fingerA_chB 5  // encoder
-#define fingerA_hallEffectPin 16
+#define fingerA_IN1 24
+#define fingerA_IN2 25
+#define fingerA_EN 46   // pwm pin
+#define fingerA_chA 2  // encoder
+#define fingerA_chB 3  // encoder
+#define fingerA_hallEffectPin 23
 
-// finger B
-#define fingerB_IN1 6
-#define fingerB_IN2 7
-#define fingerB_EN 8    // pwm pin
-#define fingerB_chA 9   // encoder
-#define fingerB_chB 10  // encoder
-#define fingerB_hallEffectPin 17
+// // finger B
+// #define fingerB_IN1 6
+// #define fingerB_IN2 7
+// #define fingerB_EN 8    // pwm pin
+// #define fingerB_chA 9   // encoder
+// #define fingerB_chB 10  // encoder
+// #define fingerB_hallEffectPin 17
 
-// finger C
-#define fingerC_IN1 11
-#define fingerC_IN2 12
-#define fingerC_EN 13   // pwm pin
-#define fingerC_chA 14  // encoder
-#define fingerC_chB 15  // encoder
-#define fingerC_hallEffectPin 18
+// // finger C
+// #define fingerC_IN1 11
+// #define fingerC_IN2 12
+// #define fingerC_EN 13   // pwm pin
+// #define fingerC_chA 14  // encoder
+// #define fingerC_chB 15  // encoder
+// #define fingerC_hallEffectPin 18
 
 
 // finger general
@@ -31,8 +31,8 @@ float minHall = 0;
 float maxHall = -900;
 
 finger fingerA(fingerA_IN1, fingerA_IN2, fingerA_EN, fingerA_chA, fingerA_chB, fingerA_hallEffectPin, minHall, maxHall);
-finger fingerB(fingerB_IN1, fingerB_IN2, fingerB_EN, fingerB_chA, fingerB_chB, fingerB_hallEffectPin, minHall, maxHall);
-finger fingerC(fingerC_IN1, fingerC_IN2, fingerC_EN, fingerC_chA, fingerC_chB, fingerC_hallEffectPin, minHall, maxHall);
+// finger fingerB(fingerB_IN1, fingerB_IN2, fingerB_EN, fingerB_chA, fingerB_chB, fingerB_hallEffectPin, minHall, maxHall);
+// finger fingerC(fingerC_IN1, fingerC_IN2, fingerC_EN, fingerC_chA, fingerC_chB, fingerC_hallEffectPin, minHall, maxHall);
 
 // UI
 #define buttonPin 9
@@ -47,11 +47,37 @@ char curObject = 'U';
 void setup() {
   
   fingerA.init();
-  fingerB.init();
-  fingerC.init();
+  // fingerB.init();
+  // fingerC.init();
 
-  initUIButton(buttonPin);
+  // initUIButton(buttonPin);
+
+  attachInterrupt(digitalPinToInterrupt(fingerA_chA), ISR_motorA_chA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(fingerA_chB), ISR_motorA_chB, CHANGE);
+  Serial.begin(9600);
+
 }
+
+// testing
+void loop(){
+  fingerA.PID(10);
+  // Serial.println(fingerA._curPos);
+
+}
+
+void ISR_motorA_chA() {
+  fingerA.updateCurState();
+}
+void ISR_motorA_chB() {
+  fingerA.updateCurState();
+}
+
+
+
+
+
+
+ /*
 
 void loop() {
   switch (state) {
@@ -132,3 +158,5 @@ void loop() {
       }
   }
 }
+
+ */
