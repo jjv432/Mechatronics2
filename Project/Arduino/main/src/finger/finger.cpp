@@ -66,21 +66,24 @@ void finger::graspObject(int desCompression){
 // Will need some sort of routine to ensure contactThreshold is robust
 bool finger::touchObject(){
   static int setPoint = 0;
-  const int contactThreshold = 7; // percent;
+  const int contactThreshold = 10; // percent;
   const int PIDIncrement = 3;
 
   int curCompression = finger::getHallEffectCompression();  
   bool contactFlag = curCompression >= contactThreshold;
+
+  // Serial.println(curCompression);
   
-  if (!contactFlag){
-    setPoint -= PIDIncrement;
-    finger::PID(setPoint);
-    return false;
-  }
-  else{
+  if(contactFlag){
     finger::stopMotor();
     return true;
-  }    
+  }   
+  else{
+    setPoint -= PIDIncrement;
+    finger::PID(setPoint);
+    return false;    
+  }
+
 }
 
 void finger::PID(int desPos) {
@@ -190,8 +193,8 @@ void finger::driveMotor(int PWM) {
 
 void finger::stopMotor() {
  
-  digitalWrite(_IN_1, HIGH);
-  digitalWrite(_IN_2, HIGH);
+  digitalWrite(_IN_1, LOW);
+  digitalWrite(_IN_2, LOW);
   
   analogWrite(_EN, 255);
 }

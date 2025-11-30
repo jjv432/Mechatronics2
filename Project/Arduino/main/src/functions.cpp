@@ -11,33 +11,35 @@
 /////////////////////////////////////////////////
 ///////////////// UI FUNCTIONS //////////////////
 /////////////////////////////////////////////////
-static bool lastButtonState = 1;
-static unsigned long lastButtonTime = 0;
-int dt = 20;
+
+int dt = 0;
 
 void initUIButton(int buttonPin){
   pinMode(buttonPin, INPUT_PULLUP);
 }
 
 bool readUIButton(int buttonPin){
-  bool buttonState = digitalRead(buttonPin);
 
-  // don't react if not enough time has passed
-  if (millis() - lastButtonTime > dt){
-    // look for a falling edge
-    if (lastButtonState && !buttonState){
-      return true; // button is pressed;
-      lastButtonTime = millis();
-    }
-    // rising edge
-    else if (!lastButtonState && !buttonState){
-      lastButtonTime = millis();
-      return false;
-    }
+  bool buttonState = digitalRead(buttonPin);
+  static bool lastButtonState = 1;
+
+
+  if (lastButtonState && !buttonState){
+    delay(dt);
+    lastButtonState = buttonState;
+    return true; // button is pressed;
+  }
+  // rising edge
+  else if (!lastButtonState && buttonState){
+    delay(dt);
+    lastButtonState = buttonState;
+    return false;
   }
   else
     return false;
+  
 
+  
 }
 
 

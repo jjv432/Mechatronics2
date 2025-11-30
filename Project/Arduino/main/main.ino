@@ -55,20 +55,23 @@ void setup() {
   Serial.begin(9600);
 
   // TEST HALL EFFECT
-  fingerA._minHallEffectReadingG = -61.0; //MUST BE MAXIMUM ABSOLUTE VALUE OF STEADY STATE
-  fingerA._maxHallEffectReadingG = -564.0;
+  fingerA._minHallEffectReadingG = -59.5; //MUST BE MAXIMUM ABSOLUTE VALUE OF STEADY STATE
+  fingerA._maxHallEffectReadingG = -370.0;
 
   // TEST SINGEL FINGER PROGRESSION
   fingerA._curPos = 0;
+
+  delay(1000);
 }
 
 
 // TEST SINGLE FINGER PROGRESSION
 void loop() {
   // Serial.print()
-  Serial.println(fingerA.getHallEffectCompression());
+  // Serial.println(fingerA.getHallEffectCompression());
   // fingerA.getHallEffectCompression();
   // Serial.println(state);
+  Serial.println(readUIButton(buttonPin));
   switch (state) {
     case 0:  // idle
       // open all fingers
