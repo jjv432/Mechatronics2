@@ -4,9 +4,9 @@
 // finger A
 #define fingerA_IN1 53
 #define fingerA_IN2 52
-#define fingerA_EN 46  // pwm pin
-#define fingerA_chA 20 // encoder
-#define fingerA_chB 21 // encoder
+#define fingerA_EN 46   // pwm pin
+#define fingerA_chA 20  // encoder
+#define fingerA_chB 21  // encoder
 #define fingerA_hallEffectPin A0
 
 // // finger B
@@ -41,11 +41,11 @@ finger fingerA(fingerA_IN1, fingerA_IN2, fingerA_EN, fingerA_chA, fingerA_chB, f
 // #define IRPin 30
 
 // general
-int state = 0;
+int state = 30;
 char curObject = 'U';
 
 void setup() {
-  
+
   fingerA.init();
 
   initUIButton(buttonPin);
@@ -55,8 +55,8 @@ void setup() {
   Serial.begin(9600);
 
   // TEST HALL EFFECT
-  fingerA._minHallEffectReadingG = -59.5; //MUST BE MAXIMUM ABSOLUTE VALUE OF STEADY STATE
-  fingerA._maxHallEffectReadingG = -370.0;
+  fingerA._minHallEffectReadingG = 0;  //MUST BE MAXIMUM ABSOLUTE VALUE OF STEADY STATE
+  fingerA._maxHallEffectReadingG = -780.0;
 
   // TEST SINGEL FINGER PROGRESSION
   fingerA._curPos = 10;
@@ -65,17 +65,17 @@ void setup() {
 }
 
 
-// TEST SINGLE FINGER PROGRESSION
+// // TEST SINGLE FINGER PROGRESSION
 void loop() {
   // Serial.print()
   // Serial.println(fingerA.getHallEffectCompression());
   // fingerA.getHallEffectCompression();
-  // Serial.println(state);
+  Serial.println(state);
   // Serial.println(readUIButton(buttonPin));
   // fingerA.graspObject(10);
-  fingerA.PID(3000);
-  
-  Serial.println(fingerA._curPos);
+  // fingerA.PID(3000);
+
+  // Serial.println(fingerA._curPos);
   // fingerA.graspObject(25);
   switch (state) {
     case 0:  // idle
@@ -91,32 +91,30 @@ void loop() {
       }
       break;
 
-    case 20:  // barely touch the object with each finger
-      bool aTouching = fingerA.touchObject();
+    case 20:
+      {
+        bool aTouching = fingerA.touchObject();
 
-      if (aTouching) {
-        state = 30;
-      }
-      break;
+        if (aTouching) {
+          state = 30;
+        }
+        break;
 
-    case 30:                            // fully grasp the object
-      const int graspCompression = 50;  // percent
+      }  // barely touch the object with each finger
 
-      fingerA.graspObject(graspCompression);
 
-      // if they've all got a stable grasp on the object...
-      if (fingerA._PIDStationary) {
-        state = 40;
-      }
+    case 30:
+      {                             // fully grasp the object
+        int graspCompression = 50;  // percent
 
-      break;
+        fingerA.graspObject(graspCompression);
 
-    case 40:  // move the object to its drop location
-      if (readUIButton(buttonPin)) {
+        if (readUIButton(buttonPin)) {
         state = 50;
       }
 
-      break;
+        break;
+      }
 
     case 50:  // drop the object
 
@@ -127,6 +125,7 @@ void loop() {
       if (fingerA._PIDStationary) {
         state = 0;
       }
+      break;
   }
 }
 
@@ -137,14 +136,14 @@ void loop() {
 
 
 // TEST HALL EFFECT
-/*
-void loop(){
-  fingerA.readHallEffect();
-  Serial.println(fingerA.getHallEffectCompression());
-  // fingerA.readHallEffect();
-  // Serial.println(fingerA._hallEffectReadingG);
-}
-*/
+
+// void loop(){
+//   // fingerA.readHallEffect();
+//   Serial.println(fingerA.getHallEffectCompression());
+//   // fingerA.readHallEffect();
+//   // Serial.println(fingerA._hallEffectReadingG);
+// }
+
 
 // TEST CALIBRATION
 /*
@@ -184,7 +183,7 @@ void ISR_motorA_chB() {
 
 
 
- /*
+/*
 
 void loop() {
   switch (state) {

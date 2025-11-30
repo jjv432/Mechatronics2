@@ -20,13 +20,13 @@ public:
   void readHallEffect();
   bool touchObject();
   unsigned int getHallEffectCompression();
-  void graspObject(int desCompression);
+  bool graspObject(int desCompression);
 
   // properties
   int _curPos = 0;   // in "ticks";
   int _curOmega = 0; // in tick/ms;
   float _kp = 0.5;
-  float _ki = 0.00006;//1;
+  float _ki = 0.000006;//1;
   float _kd = 0.0003;
   int _EN;
   int _IN_1;

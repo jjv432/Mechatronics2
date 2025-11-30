@@ -42,9 +42,11 @@ void finger::init() {
 /////////////////////////////////////////////////
 
 // grab the finger at a desired compression
-void finger::graspObject(int desCompression){
+bool finger::graspObject(int desCompression){
   static int desPos = _curPos;
   const int increment = 1;
+
+
 
   // keep in bounds
   desCompression = 100*(desCompression > 100) + desCompression*(desCompression <= 100);
@@ -53,17 +55,26 @@ void finger::graspObject(int desCompression){
   int curCompression = finger::getHallEffectCompression();  
   // Serial.println(curCompression < desCompression);
   if (curCompression < desCompression){
-    desPos -= increment;
+    desPos = desPos - increment;
     // desPos = _curPos + 1;
   }
   else if (curCompression > desCompression){
-    desPos += increment;
+    desPos = desPos + increment;
     // desPos = _curPos - 1;
   }
+  else if ((curCompression - desCompression) >=10){
+    return true;
+  }
+  // Serial.print(curCompression);
+  // Serial.print("\t");
+  // Serial.println(desCompression);
+  // Serial.println(abs(curCompression - desCompression) <=10);
   
 
   finger::PID(desPos);
-  delay(200);
+  
+  // delay(200);
+  return false;
 
 }
 
