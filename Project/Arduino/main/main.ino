@@ -70,8 +70,8 @@ void loop() {
   // Serial.print()
   // Serial.println(fingerA.getHallEffectCompression());
   // fingerA.getHallEffectCompression();
-  // Serial.println(state);
-  Serial.println(readUIButton(buttonPin));
+  Serial.println(state);
+  // Serial.println(readUIButton(buttonPin));
   switch (state) {
     case 0:  // idle
       // open all fingers
