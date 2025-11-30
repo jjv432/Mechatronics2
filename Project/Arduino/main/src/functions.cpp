@@ -12,34 +12,30 @@
 ///////////////// UI FUNCTIONS //////////////////
 /////////////////////////////////////////////////
 
-int dt = 0;
-
 void initUIButton(int buttonPin){
   pinMode(buttonPin, INPUT_PULLUP);
 }
 
 bool readUIButton(int buttonPin){
-
+  int dt = 0;
   bool buttonState = digitalRead(buttonPin);
   static bool lastButtonState = 1;
 
 
-  if (lastButtonState && !buttonState){
+  if (lastButtonState && !buttonState){ // falling edge
     delay(dt);
     lastButtonState = buttonState;
     return true; // button is pressed;
   }
-  // rising edge
-  else if (!lastButtonState && buttonState){
+  else if (!lastButtonState && buttonState){ // rising edge
     delay(dt);
     lastButtonState = buttonState;
     return false;
   }
-  else
-    return false;
-  
-
-  
+  else{
+    return false;  
+  }
+    
 }
 
 

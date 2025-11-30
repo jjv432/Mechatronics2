@@ -9,30 +9,12 @@
 #define fingerA_chB 21  // encoder
 #define fingerA_hallEffectPin A0
 
-// // finger B
-// #define fingerB_IN1 6
-// #define fingerB_IN2 7
-// #define fingerB_EN 8    // pwm pin
-// #define fingerB_chA 9   // encoder
-// #define fingerB_chB 10  // encoder
-// #define fingerB_hallEffectPin 17
-
-// // finger C
-// #define fingerC_IN1 11
-// #define fingerC_IN2 12
-// #define fingerC_EN 13   // pwm pin
-// #define fingerC_chA 14  // encoder
-// #define fingerC_chB 15  // encoder
-// #define fingerC_hallEffectPin 18
-
 
 // finger general
 float minHall = 0;
 float maxHall = -900;
 
 finger fingerA(fingerA_IN1, fingerA_IN2, fingerA_EN, fingerA_chA, fingerA_chB, fingerA_hallEffectPin, minHall, maxHall);
-// finger fingerB(fingerB_IN1, fingerB_IN2, fingerB_EN, fingerB_chA, fingerB_chB, fingerB_hallEffectPin, minHall, maxHall);
-// finger fingerC(fingerC_IN1, fingerC_IN2, fingerC_EN, fingerC_chA, fingerC_chB, fingerC_hallEffectPin, minHall, maxHall);
 
 // UI
 #define buttonPin 8
@@ -67,16 +49,8 @@ void setup() {
 
 // // TEST SINGLE FINGER PROGRESSION
 void loop() {
-  // Serial.print()
-  // Serial.println(fingerA.getHallEffectCompression());
-  // fingerA.getHallEffectCompression();
   Serial.println(state);
-  // Serial.println(readUIButton(buttonPin));
-  // fingerA.graspObject(10);
-  // fingerA.PID(3000);
 
-  // Serial.println(fingerA._curPos);
-  // fingerA.graspObject(25);
   switch (state) {
     case 0:  // idle
       // open all fingers
@@ -129,7 +103,12 @@ void loop() {
   }
 }
 
-
+void ISR_motorA_chA() {
+  fingerA.updateCurState();
+}
+void ISR_motorA_chB() {
+  fingerA.updateCurState();
+}
 
 
 
@@ -171,12 +150,6 @@ void loop(){
 
 */
 
-void ISR_motorA_chA() {
-  fingerA.updateCurState();
-}
-void ISR_motorA_chB() {
-  fingerA.updateCurState();
-}
 
 
 

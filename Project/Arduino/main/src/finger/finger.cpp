@@ -46,8 +46,6 @@ bool finger::graspObject(int desCompression){
   static int desPos = _curPos;
   const int increment = 1;
 
-
-
   // keep in bounds
   desCompression = 100*(desCompression > 100) + desCompression*(desCompression <= 100);
 
@@ -56,24 +54,16 @@ bool finger::graspObject(int desCompression){
   // Serial.println(curCompression < desCompression);
   if (curCompression < desCompression){
     desPos = desPos - increment;
-    // desPos = _curPos + 1;
   }
   else if (curCompression > desCompression){
     desPos = desPos + increment;
-    // desPos = _curPos - 1;
   }
   else if ((curCompression - desCompression) >=10){
     return true;
   }
-  // Serial.print(curCompression);
-  // Serial.print("\t");
-  // Serial.println(desCompression);
-  // Serial.println(abs(curCompression - desCompression) <=10);
-  
 
   finger::PID(desPos);
-  
-  // delay(200);
+
   return false;
 
 }
@@ -109,7 +99,6 @@ void finger::PID(int desPos) {
   // desPos will be determined as a function of compression when using the hall
   // effect. It's useful to have a baseline PID function, though REMEMBER CURPOS
   // IS IN "TICKS"
-  static long last_p_error = 0;
   static unsigned int last_time = millis();
   static long i_error = 0; // integral of error;
   static int stationaryCounter = 0;
@@ -123,8 +112,8 @@ void finger::PID(int desPos) {
 
   // find errors
   long  p_error = desPos - _curPos;                // P;
-  float d_error = -(_curPos - lastPos) / dt; // D;
-  i_error += (float(p_error) / 1000.) * dt;                      // I;
+  float d_error = -(_curPos - lastPos) / dt;       // D;
+  i_error += (float(p_error) / 1000.) * dt;        // I;
 
   // reset for next time
   lastPos = _curPos;
@@ -238,9 +227,7 @@ void finger::releaseMotor() {
 void finger::calibrateMotor() {
 
   const int testSpeed = 200;
-
   static int lastPos = -999;
-
   static int state = 0;
 
   switch(state){
