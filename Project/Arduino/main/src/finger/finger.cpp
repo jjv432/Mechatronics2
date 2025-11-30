@@ -190,6 +190,8 @@ void finger::releaseMotor() {
 
 void finger::calibrateMotor() {
 
+  const int testSpeed = 200;
+
   static int lastPos = -999;
 
   static int state = 0;
@@ -197,14 +199,14 @@ void finger::calibrateMotor() {
   switch(state){
     // you just started calibrating
     case 0:
-      finger::driveMotor(200);
+      finger::driveMotor(255);
       if (_curPos > 5){
         state = 1;
       }
       break;
     // now, omega has started to update and you can rely on it
     case 1: 
-      finger::driveMotor(200);
+      finger::driveMotor(testSpeed);
       if (_curOmega == 0){
         state = 2;
       }
@@ -271,9 +273,7 @@ void finger::updateCurPos() {
     } else if (_lastState == 1) {
       _curPos--;
       _curOmega = -1 / dt;
-    } else if (_lastState == 0) {
-      _curOmega = 0;
-    }
+    } 
     break;
 
   case 1:
@@ -283,9 +283,7 @@ void finger::updateCurPos() {
     } else if (_lastState == 2) {
       _curPos--;
       _curOmega = -1 / dt;
-    } else if (_lastState == 1) {
-      _curOmega = 0;
-    }
+    } 
     break;
 
   case 2:
@@ -295,9 +293,7 @@ void finger::updateCurPos() {
     } else if (_lastState == 3) {
       _curPos--;
       _curOmega = -1 / dt;
-    } else if (_lastState == 2) {
-      _curOmega = 0;
-    }
+    } 
     break;
 
   case 3:
@@ -307,10 +303,12 @@ void finger::updateCurPos() {
     } else if (_lastState == 0) {
       _curPos--;
       _curOmega = -1 / dt;
-    } else if (_lastState == 3) {
-      _curOmega = 0;
     }
     break;
+  }
+
+  if (_lastState == _curState){
+    _curOmega = 0;
   }
 }
 

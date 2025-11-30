@@ -2,12 +2,12 @@
 #include "src/functions.h"
 
 // finger A
-#define fingerA_IN1 24
-#define fingerA_IN2 25
-#define fingerA_EN 46   // pwm pin
-#define fingerA_chA 2  // encoder
-#define fingerA_chB 3  // encoder
-#define fingerA_hallEffectPin 23
+#define fingerA_IN1 53
+#define fingerA_IN2 52
+#define fingerA_EN 46  // pwm pin
+#define fingerA_chA 18 // encoder
+#define fingerA_chB 19 // encoder
+#define fingerA_hallEffectPin A0
 
 // // finger B
 // #define fingerB_IN1 6
@@ -34,11 +34,11 @@ finger fingerA(fingerA_IN1, fingerA_IN2, fingerA_EN, fingerA_chA, fingerA_chB, f
 // finger fingerB(fingerB_IN1, fingerB_IN2, fingerB_EN, fingerB_chA, fingerB_chB, fingerB_hallEffectPin, minHall, maxHall);
 // finger fingerC(fingerC_IN1, fingerC_IN2, fingerC_EN, fingerC_chA, fingerC_chB, fingerC_hallEffectPin, minHall, maxHall);
 
-// UI
-#define buttonPin 9
+// // UI
+// #define buttonPin 9
 
-// IR
-#define IRPin 30
+// // IR
+// #define IRPin 30
 
 // general
 int state = 0;
@@ -55,7 +55,26 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(fingerA_chA), ISR_motorA_chA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(fingerA_chB), ISR_motorA_chB, CHANGE);
   Serial.begin(9600);
+  // delay(1000);
+
+  // TEST HALL EFFECT
+  fingerA._minHallEffectReadingG = -61.0;
+  fingerA._maxHallEffectReadingG = -564.0;
 }
+
+
+// TEST HALL EFFECT
+
+void loop(){
+  fingerA.readHallEffect();
+  Serial.println(fingerA.getHallEffectCompression());
+  // fingerA.readHallEffect();
+  // Serial.println(fingerA._hallEffectReadingG);
+}
+
+
+// TEST CALIBRATION
+/*
 
 bool stateCalib = 0;
 // testing
@@ -75,9 +94,10 @@ void loop(){
   // fingerA.PID(0);
 
   Serial.println(fingerA._calibrated);
-  // Serial.println(fingerA._curOmega);
-
+ 
 }
+
+*/
 
 void ISR_motorA_chA() {
   fingerA.updateCurState();
