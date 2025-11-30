@@ -32,6 +32,9 @@ void finger::init() {
 
   // enable the hall effect input
   pinMode(_hallEffectPin, INPUT);
+
+  // Make UI button PUP
+  pinMode(_hallEffectPin, INPUT);
 }
 
 /////////////////////////////////////////////////
@@ -60,16 +63,17 @@ void finger::graspObject(int desCompression){
 }
 
 // drive forward until barely running into the object
+// Will need some sort of routine to ensure contactThreshold is robust
 bool finger::touchObject(){
   static int setPoint = 0;
-  const int contactThreshold = 10; // percent;
-  const int PIDIncrement = 10;
+  const int contactThreshold = 7; // percent;
+  const int PIDIncrement = 3;
 
   int curCompression = finger::getHallEffectCompression();  
-  bool contactFlag = curCompression > contactThreshold;
+  bool contactFlag = curCompression >= contactThreshold;
   
   if (!contactFlag){
-    setPoint += PIDIncrement;
+    setPoint -= PIDIncrement;
     finger::PID(setPoint);
     return false;
   }
@@ -148,8 +152,20 @@ unsigned int finger::getHallEffectCompression(){
   // update the reading
   finger::readHallEffect();
 
-  int readingPercentage = map(_hallEffectReadingG, _minHallEffectReadingG, _maxHallEffectReadingG, 0., 100.);
-  return readingPercentage;
+  // Serial.println(_hallEffectReadingG);
+  // stop integer from rolling over
+  if (abs(_hallEffectReadingG) < abs(_minHallEffectReadingG)){
+    return 0;
+  }
+  else if (abs(_hallEffectReadingG) > abs(_maxHallEffectReadingG)){
+    return 100;
+  }
+  else{
+    int readingPercentage = map(_hallEffectReadingG, _minHallEffectReadingG, _maxHallEffectReadingG, 0., 100.);
+    return readingPercentage;
+  }
+
+  
 }
 
 
