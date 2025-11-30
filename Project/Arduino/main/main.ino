@@ -5,8 +5,8 @@
 #define fingerA_IN1 53
 #define fingerA_IN2 52
 #define fingerA_EN 46  // pwm pin
-#define fingerA_chA 18 // encoder
-#define fingerA_chB 19 // encoder
+#define fingerA_chA 20 // encoder
+#define fingerA_chB 21 // encoder
 #define fingerA_hallEffectPin A0
 
 // // finger B
@@ -59,7 +59,7 @@ void setup() {
   fingerA._maxHallEffectReadingG = -370.0;
 
   // TEST SINGEL FINGER PROGRESSION
-  fingerA._curPos = 0;
+  fingerA._curPos = 10;
 
   delay(1000);
 }
@@ -70,8 +70,12 @@ void loop() {
   // Serial.print()
   // Serial.println(fingerA.getHallEffectCompression());
   // fingerA.getHallEffectCompression();
-  Serial.println(state);
+  // Serial.println(state);
   // Serial.println(readUIButton(buttonPin));
+  // fingerA.graspObject(10);
+  // fingerA.PID(5);
+  Serial.println(fingerA._curPos);
+  // fingerA.graspObject(25);
   switch (state) {
     case 0:  // idle
       // open all fingers

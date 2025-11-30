@@ -44,21 +44,26 @@ void finger::init() {
 // grab the finger at a desired compression
 void finger::graspObject(int desCompression){
   static int desPos = _curPos;
-  const int increment = 10;
+  const int increment = 1;
 
   // keep in bounds
   desCompression = 100*(desCompression > 100) + desCompression*(desCompression <= 100);
 
-  int curCompression = finger::getHallEffectCompression();  
 
+  int curCompression = finger::getHallEffectCompression();  
+  Serial.println(curCompression < desCompression);
   if (curCompression < desCompression){
-    desPos += increment;
+    desPos -= increment;
+    // desPos = _curPos + 1;
   }
   else if (curCompression > desCompression){
-    desPos -= increment;
+    desPos += increment;
+    // desPos = _curPos - 1;
   }
+  
 
   finger::PID(desPos);
+  delay(200);
 
 }
 
@@ -122,16 +127,16 @@ void finger::PID(int desPos) {
   }
 
   // increment if you've been stationary
-  if (abs(p_error) <= 1) {
+  if (abs(p_error) <= 3) {
     stationaryCounter++;
   } else {
     stationaryCounter = 0;
   }
 
   // flush integral error if you've been stationary for a while
-  if (stationaryCounter >= 15) {
+  if (stationaryCounter >= 10) {
     i_error = 0;
-    lastStationaryPosition = desPos;
+    lastStationaryPosition = _curPos;
     finger::stopMotor(); // just hold the current position
     _PIDStationary = true;
     // in case desPos changes, reset all of this logic
@@ -188,10 +193,11 @@ void finger::driveMotor(int PWM) {
   } else if (PWM <= 0) {
     digitalWrite(_IN_1, LOW);
     digitalWrite(_IN_2, HIGH);
+    PWM = -PWM;
   }
 
   // Set the speed
-  analogWrite(_EN, abs(PWM));
+  analogWrite(_EN, PWM);
 }
 
 void finger::stopMotor() {
