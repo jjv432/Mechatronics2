@@ -25,9 +25,9 @@ public:
   // properties
   int _curPos = 0;   // in "ticks";
   int _curOmega = 0; // in tick/ms;
-  float _kp = 10.0;
-  float _ki = 0.00005;
-  float _kd = 1.0;
+  float _kp = 0.5;
+  float _ki = 0.00006;//1;
+  float _kd = 0.0003;
   int _EN;
   int _IN_1;
   int _IN_2;

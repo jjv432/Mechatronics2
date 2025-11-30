@@ -51,7 +51,7 @@ void finger::graspObject(int desCompression){
 
 
   int curCompression = finger::getHallEffectCompression();  
-  Serial.println(curCompression < desCompression);
+  // Serial.println(curCompression < desCompression);
   if (curCompression < desCompression){
     desPos -= increment;
     // desPos = _curPos + 1;
@@ -98,11 +98,12 @@ void finger::PID(int desPos) {
   // desPos will be determined as a function of compression when using the hall
   // effect. It's useful to have a baseline PID function, though REMEMBER CURPOS
   // IS IN "TICKS"
-  static int last_p_error = 0;
+  static long last_p_error = 0;
   static unsigned int last_time = millis();
-  static int i_error = 0; // integral of error;
+  static long i_error = 0; // integral of error;
   static int stationaryCounter = 0;
   static int lastStationaryPosition = 0;
+  static int lastPos = 0;
 
   // get timing info
   unsigned int now = millis();
@@ -110,15 +111,16 @@ void finger::PID(int desPos) {
   last_time = now;
 
   // find errors
-  int p_error = desPos - _curPos;                // P;
-  float d_error = (last_p_error - p_error) / dt; // D;
-  i_error -= p_error * dt;                      // I;
+  long  p_error = desPos - _curPos;                // P;
+  float d_error = -(_curPos - lastPos) / dt; // D;
+  i_error += (float(p_error) / 1000.) * dt;                      // I;
 
   // reset for next time
-  last_p_error = p_error;
+  lastPos = _curPos;
 
   // Calculate commanded PWM (speed)
   float PwmCommand = _kp * p_error + _kd * d_error + _ki * i_error;
+ 
 
   if (PwmCommand > 255) {
     PwmCommand = 255;
@@ -126,8 +128,10 @@ void finger::PID(int desPos) {
     PwmCommand = -255;
   }
 
+  //  Serial.println(PwmCommand);
+
   // increment if you've been stationary
-  if (abs(p_error) <= 3) {
+  if (abs(p_error) <= 15) {
     stationaryCounter++;
   } else {
     stationaryCounter = 0;
@@ -137,16 +141,20 @@ void finger::PID(int desPos) {
   if (stationaryCounter >= 10) {
     i_error = 0;
     lastStationaryPosition = _curPos;
-    finger::stopMotor(); // just hold the current position
+    finger::releaseMotor(); // just hold the current position
     _PIDStationary = true;
     // in case desPos changes, reset all of this logic
-    if (desPos != lastStationaryPosition) {
+    if (abs(desPos - lastStationaryPosition) > 2) {
       stationaryCounter = 0;
       _PIDStationary = false;
     }
   }
-  else
-    finger::driveMotor(PwmCommand);
+
+  if (_PIDStationary){
+    PwmCommand = 0;
+  }
+
+  finger::driveMotor(PwmCommand);
 }
 
 /////////////////////////////////////////////////

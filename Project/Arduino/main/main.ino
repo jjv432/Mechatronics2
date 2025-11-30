@@ -73,7 +73,8 @@ void loop() {
   // Serial.println(state);
   // Serial.println(readUIButton(buttonPin));
   // fingerA.graspObject(10);
-  // fingerA.PID(5);
+  fingerA.PID(3000);
+  
   Serial.println(fingerA._curPos);
   // fingerA.graspObject(25);
   switch (state) {
