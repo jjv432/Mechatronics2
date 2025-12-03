@@ -1,26 +1,7 @@
 #include "src/finger/finger.h"  // doing it like this so git will keep up
+#include "src/constants.h"
 #include "src/functions.h"
 
-// finger A
-#define fingerA_IN1 53
-#define fingerA_IN2 52
-#define fingerA_EN 46   // pwm pin
-#define fingerA_chA 20  // encoder
-#define fingerA_chB 21  // encoder
-#define fingerA_hallEffectPin A0
-
-
-// finger general
-float minHall = 0;
-float maxHall = -900;
-
-finger fingerA(fingerA_IN1, fingerA_IN2, fingerA_EN, fingerA_chA, fingerA_chB, fingerA_hallEffectPin, minHall, maxHall);
-
-// UI
-#define buttonPin 8
-
-// // IR
-// #define IRPin 30
 
 // general
 int state = 30;
@@ -30,10 +11,10 @@ void setup() {
 
   fingerA.init();
 
-  initUIButton(buttonPin);
+  initUIButton();
 
-  attachInterrupt(digitalPinToInterrupt(fingerA_chA), ISR_motorA_chA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(fingerA_chB), ISR_motorA_chB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(fA_chA), ISR_motorA_chA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(fA_chB), ISR_motorA_chB, CHANGE);
   Serial.begin(9600);
 
   // TEST HALL EFFECT
@@ -60,7 +41,7 @@ void loop() {
       curObject = 'U';
 
       //read the button
-      if (readUIButton(buttonPin)) {
+      if (readUIButton()) {
         state = 20;
       }
       break;
@@ -83,9 +64,9 @@ void loop() {
 
         fingerA.graspObject(graspCompression);
 
-        if (readUIButton(buttonPin)) {
-        state = 50;
-      }
+        if (readUIButton()) {
+          state = 50;
+        }
 
         break;
       }
@@ -101,13 +82,6 @@ void loop() {
       }
       break;
   }
-}
-
-void ISR_motorA_chA() {
-  fingerA.updateCurState();
-}
-void ISR_motorA_chB() {
-  fingerA.updateCurState();
 }
 
 

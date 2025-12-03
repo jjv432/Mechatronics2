@@ -1,22 +1,17 @@
 #include "functions.h"
 #include "Arduino.h"
-
-
-/////////////////////////////////////////////////
-////////////// HELPER FUNCTIONS /////////////////
-/////////////////////////////////////////////////
-
+#include "constants.h"
 
 
 /////////////////////////////////////////////////
 ///////////////// UI FUNCTIONS //////////////////
 /////////////////////////////////////////////////
 
-void initUIButton(int buttonPin){
+void initUIButton(){
   pinMode(buttonPin, INPUT_PULLUP);
 }
 
-bool readUIButton(int buttonPin){
+bool readUIButton(){
   int dt = 0;
   bool buttonState = digitalRead(buttonPin);
   static bool lastButtonState = 1;
@@ -79,6 +74,8 @@ char identifyObjectIR(int inputPin){
 
   // disable the interrupt to avoid interfering with encoders
   detachInterrupt(digitalPinToInterrupt(inputPin));
+  lastInterruptTime = 0;
+  curInterruptTime = 0;
 
 }
 
@@ -86,3 +83,23 @@ void IR_ISR(){
   lastInterruptTime = curInterruptTime;
   curInterruptTime = micros();
 }
+
+
+/////////////////////////////////////////////////
+///////////////// INTERRUPTS ////////////////////
+/////////////////////////////////////////////////
+
+
+void ISR_motorA_chA() {
+  fingerA.updateCurState();
+}
+void ISR_motorA_chB() {
+  fingerA.updateCurState();
+}
+
+
+
+/////////////////////////////////////////////////
+////////////// HELPER FUNCTIONS /////////////////
+/////////////////////////////////////////////////
+

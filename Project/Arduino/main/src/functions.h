@@ -5,8 +5,9 @@
 
 char identifyObjectIR(int inputPin);
 void IR_ISR();
-bool readUIButton(int buttonPin);
-void initUIButton(int buttonPin);
-
+bool readUIButton();
+void initUIButton();
+void ISR_motorA_chA();
+void ISR_motorA_chB();
 
 #endif
