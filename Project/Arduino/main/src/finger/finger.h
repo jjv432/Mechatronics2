@@ -5,8 +5,7 @@
 
 class finger {
 public:
-  finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
-                         int hallEffectPin, float minHallEffectReadingG, float maxHallEffectReadingG);
+  finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int hallEffectPin);
 
   // methods
   void init();

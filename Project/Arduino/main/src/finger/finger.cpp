@@ -5,8 +5,7 @@
 /////////////// CONSTRUCTOR, INIT////////////////
 /////////////////////////////////////////////////
 
-finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
-                         int hallEffectPin, float minHallEffectReadingG, float maxHallEffectReadingG) {
+finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int hallEffectPin) {
   _IN_1 = IN_1;
   _IN_2 = IN_2;
   _EN = EN;
@@ -15,8 +14,6 @@ finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b,
   _input_ch[1] = ch_b;
 
   _hallEffectPin = hallEffectPin;
-  _minHallEffectReadingG = minHallEffectReadingG;
-  _maxHallEffectReadingG = maxHallEffectReadingG;
 
 }
 

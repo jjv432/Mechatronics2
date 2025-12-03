@@ -19,8 +19,6 @@
 
 // finger constants
 // inline makes it so we can treat these values as global vars
-inline float fA_minHall = -999; 
-inline float fA_maxHall = 0;
 
 // finger A
 #define fA_IN1 53
@@ -30,7 +28,7 @@ inline float fA_maxHall = 0;
 #define fA_chB 21
 #define fA_hallEffectPin A0
 
-inline finger fingerA(fA_IN1, fA_IN2, fA_EN, fA_chA, fA_chB, fA_hallEffectPin, fA_minHall, fA_maxHall);
+inline finger fingerA(fA_IN1, fA_IN2, fA_EN, fA_chA, fA_chB, fA_hallEffectPin);
 
 // ...
 
