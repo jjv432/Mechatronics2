@@ -1,7 +1,10 @@
 #include "src/finger/finger.h"  // doing it like this so git will keep up
 #include "src/constants.h"
 #include "src/functions.h"
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+#define DEBUG_STATE 0  // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration
 
 // general
 int state = 30;
@@ -17,6 +20,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(fA_chB), ISR_motorA_chB, CHANGE);
   Serial.begin(9600);
 
+  lcd.init();
+  lcd.backlight();
+
   // TEST HALL EFFECT
   fingerA._minHallEffectReadingG = 0;  //MUST BE MAXIMUM ABSOLUTE VALUE OF STEADY STATE
   fingerA._maxHallEffectReadingG = -780.0;
@@ -27,9 +33,23 @@ void setup() {
   delay(1000);
 }
 
-
-// // TEST SINGLE FINGER PROGRESSION
 void loop() {
+  if (DEBUG_STATE == 0) {
+    loopNormal();
+  } else if (DEBUG_STATE == 1) {
+    loopHallEffect();
+  } else if (DEBUG_STATE == 2) {
+    loopUIButton();
+  } else if (DEBUG_STATE == 3) {
+    loopCalibrationTest();
+  }
+}
+
+/////////////////////////////////////////////////
+//////////////// NORMAL LOOP ////////////////////
+/////////////////////////////////////////////////
+// TEST SINGLE FINGER PROGRESSION
+void loopNormal() {
   Serial.println(state);
 
   switch (state) {
@@ -82,49 +102,75 @@ void loop() {
       }
       break;
   }
+
+  printState(state);
 }
 
+void printState(int curState) {
+  static int lastState = 0;
+  if (curState != lastState) {
+    lcd.print(state);
+    lastState = curState;
+  }
+}
 
+/////////////////////////////////////////////////
+//////////////// DEBUG LOOPS ////////////////////
+/////////////////////////////////////////////////
 
+void loopCalibrationTest() {
+  char desiredFinger = 'a';
+  finger* curFinger = nullptr;
 
+  switch (desiredFinger) {
+    case 'a':
+      curFinger = &fingerA;
+      break;
+  }
 
-// TEST HALL EFFECT
-
-// void loop(){
-//   // fingerA.readHallEffect();
-//   Serial.println(fingerA.getHallEffectCompression());
-//   // fingerA.readHallEffect();
-//   // Serial.println(fingerA._hallEffectReadingG);
-// }
-
-
-// TEST CALIBRATION
-/*
-
-bool stateCalib = 0;
-// testing
-void loop(){
-
-  switch (stateCalib){
-    case 0: 
-      fingerA._calibrated = 0;
+  static bool stateCalib = 0;
+  switch (stateCalib) {
+    case 0:
+      curFinger->_calibrated = 0;
       delay(1000);
       stateCalib = 1;
       break;
     case 1:
-      fingerA.calibrateMotor();
+      curFinger->calibrateMotor();
       break;
   }
-  
-  // fingerA.PID(0);
 
-  Serial.println(fingerA._calibrated);
- 
+  Serial.println(curFinger->_calibrated);
 }
 
-*/
+void loopUIButton() {
+  Serial.println(readUIButton());
+}
 
+void loopHallEffect() {
+  char desiredFinger = 'a';
 
+  int compression = 0;
+  float reading = 0;
+
+  finger* curFinger = nullptr;
+
+  switch (desiredFinger) {
+    case 'a':
+      curFinger = &fingerA;
+      break;
+  }
+
+  compression = curFinger->getHallEffectCompression();
+  curFinger->readHallEffect();
+  reading = curFinger->_hallEffectReadingG;
+
+  Serial.print("Current compression (%): ");
+  Serial.print(compression);
+  Serial.print("\t");
+  Serial.print("Current Reading (G): ");
+  Serial.println(reading);
+}
 
 
 
