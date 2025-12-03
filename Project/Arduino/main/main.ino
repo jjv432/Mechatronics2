@@ -4,7 +4,7 @@
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-#define DEBUG_STATE 0  // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration
+#define DEBUG_STATE 0  // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID
 
 // general
 int state = -1;
@@ -40,6 +40,8 @@ void loop() {
     loopUIButton();
   } else if (DEBUG_STATE == 3) {
     loopCalibrationTest();
+  } else if (DEBUG_STATE == 4) {
+    loopPIDTest();
   }
 }
 
@@ -54,7 +56,6 @@ void loopNormal() {
     case -1: // calibrate
       delay(100);
       while(fingerA._calibrated == 0){
-        
         fingerA.calibrateMotor();
       }
       // while(fingerB._calibrated == 0){
@@ -125,6 +126,34 @@ void printState(int curState) {
 /////////////////////////////////////////////////
 //////////////// DEBUG LOOPS ////////////////////
 /////////////////////////////////////////////////
+
+void loopPIDTest(){
+  char desiredFinger = 'a';
+  finger* curFinger = nullptr;
+
+  switch (desiredFinger) {
+    case 'a':
+      curFinger = &fingerA;
+      break;
+  }
+
+  const int maxPos = 300;
+  const int minPos = 0;
+
+  static int desPos = minPos;
+
+
+  if (curFinger->_PIDStationary){
+    if (desPos == minPos){
+      desPos = maxPos;
+    }
+    else if (desPos == maxPos){
+      desPos = minPos;
+    }
+  }
+
+  curFinger->PID(desPos);
+}
 
 void loopCalibrationTest() {
   char desiredFinger = 'a';
