@@ -5,7 +5,7 @@
 // LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction
-#define DEBUG_STATE 2
+#define DEBUG_STATE 0
 
 // general
 int state = -1;
@@ -55,18 +55,24 @@ void loop() {
 /////////////////////////////////////////////////
 
 void loopNormal() {
-  Serial.println(state);
+  // if (readUIButton()){
+  //   Serial.println("--------------------");
+  // }
+  Serial.println(readUIButton());
+  // Serial.println(digitalRead(buttonPin));
+  // Serial.println(state);
   // Serial.println(fingerA._calibrated);
   // Serial.println(fingerA._curOmega);
 
   switch (state) {
     case -1:  // calibrate
       if (fingerA._calibrated == 0) {
-        fingerA.calibrateMotor();
+        // fingerA.calibrateMotor();
       }
 
       if (fingerA._calibrated) {
-        state = 0;
+        // state = 0;
+        delay(200);
       }
       break;
     case 0:  // idle
@@ -78,7 +84,7 @@ void loopNormal() {
       curObject = 'U';
 
       //read the button
-      if (readUIButton()) {
+      if (readUIButton() == 1) {
         state = 20;
       }
       break;

@@ -26,7 +26,12 @@ bool readUIButton(){
     delay(dt);
     lastButtonState = buttonState;
     return false;
-  }    
+  }
+  else if (lastButtonState == buttonState && buttonState == 0){
+    return true;
+  }
+  else
+    return false;
 }
 
 
