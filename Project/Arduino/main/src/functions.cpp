@@ -98,6 +98,20 @@ void ISR_motorA_chB() {
   fingerA.updateCurState();
 }
 
+void ISR_motorB_chA() {
+  fingerB.updateCurState();
+}
+void ISR_motorB_chB() {
+  fingerB.updateCurState();
+}
+
+void ISR_motorC_chA() {
+  fingerC.updateCurState();
+}
+void ISR_motorC_chB() {
+  fingerC.updateCurState();
+}
+
 
 
 /////////////////////////////////////////////////

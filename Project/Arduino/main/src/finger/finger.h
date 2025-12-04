@@ -37,6 +37,12 @@ public:
   float _maxHallEffectReadingG = -400;
   bool _PIDStationary = false;
   bool _calibrated = false;
+  bool _flushI = false;
+  bool _flushTO = false;
+  bool _flushGO = false;
+
+  int _ch_a;
+  int _ch_b;
 
 private:
   static void updateISR();
@@ -48,12 +54,12 @@ private:
   int _curState = 0;
   int _lastState = 0;
   
-  float _hallEffectVCC = 5.0;
+  float _hallEffectVCC = 5;
   float _zeroField = _hallEffectVCC / 2;
   float _hallEffectSensitivity = .001;
   float _hallEffectResolution = _hallEffectVCC / 1023.0;
 
-  int _input_ch[2];
+  
 };
 
 #endif

@@ -10,8 +10,8 @@ finger::finger(int IN_1, int IN_2, int EN, int ch_a, int ch_b, int hallEffectPin
   _IN_2 = IN_2;
   _EN = EN;
 
-  _input_ch[0] = ch_a;
-  _input_ch[1] = ch_b;
+  _ch_a = ch_a;
+  _ch_b = ch_b;
 
   _hallEffectPin = hallEffectPin;
 
@@ -23,9 +23,8 @@ void finger::init() {
   pinMode(_IN_2, OUTPUT);
 
   // Make all the encoder pins inputs
-  for (int i = 0; i < 2; i++) {
-    pinMode(_input_ch[i], INPUT_PULLUP);
-  }
+  pinMode(_ch_a, INPUT_PULLUP);
+  pinMode(_ch_b, INPUT_PULLUP);
 
   // enable the hall effect input
   pinMode(_hallEffectPin, INPUT);
@@ -50,16 +49,23 @@ bool finger::graspObject(int desCompression){
   int curCompression = finger::getHallEffectCompression();  
   // Serial.println(curCompression < desCompression);
   if (curCompression < desCompression){
-    desPos = desPos - increment;
+    desPos += increment;
   }
   else if (curCompression > desCompression){
-    desPos = desPos + increment;
+    desPos -= increment;
   }
-  else if ((curCompression - desCompression) >=10){
+  else if (abs(curCompression - desCompression) >=10){
+    desPos = _curPos;
+    _flushI = true;
     return true;
   }
 
   finger::PID(desPos);
+
+  if (_flushGO == 1){
+    desPos = _curPos;
+    _flushGO = 0;
+  }
 
   return false;
 
@@ -69,7 +75,7 @@ bool finger::graspObject(int desCompression){
 // Will need some sort of routine to ensure contactThreshold is robust
 bool finger::touchObject(){
   static int setPoint = 0;
-  const int contactThreshold = 15; // percent;
+  const int contactThreshold = 5; // percent;
   const int PIDIncrement = 3;
   static int lastContactFlag = 0;
 
@@ -83,11 +89,16 @@ bool finger::touchObject(){
     finger::stopMotor();
   }   
   else{
-    setPoint -= PIDIncrement;
+    setPoint += PIDIncrement;
     finger::PID(setPoint);  
   }
 
   lastContactFlag = contactFlag;
+
+  if (_flushTO == 1){
+    setPoint = 0;
+    _flushTO = 0;
+  }
 
   return checkBool;
 }
@@ -128,7 +139,7 @@ void finger::PID(int desPos) {
   //  Serial.println(PwmCommand);
 
   // increment if you've been stationary
-  if (abs(p_error) <= 15) {
+  if ((abs(p_error) <= 20)) {
     stationaryCounter++;
   } else {
     stationaryCounter = 0;
@@ -151,6 +162,10 @@ void finger::PID(int desPos) {
     PwmCommand = 0;
   }
 
+  if (_flushI){
+    i_error = 0;
+    _flushI = 0;
+  }
   finger::driveMotor(PwmCommand);
 }
 
@@ -267,8 +282,8 @@ void finger::updateCurState() {
   // that was interrupted, you'll know which direction you spun
 
   // read both channels of the encoder
-  bool a = digitalRead(_input_ch[0]);
-  bool b = digitalRead(_input_ch[1]);
+  bool a = digitalRead(_ch_a);
+  bool b = digitalRead(_ch_b);
 
   // update state info
   _lastState = _curState;
