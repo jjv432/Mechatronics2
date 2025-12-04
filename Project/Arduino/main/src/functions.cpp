@@ -12,9 +12,9 @@ void initUIButton(){
 }
 
 bool readUIButton(){
-  int dt = 0;
+  int dt = 50;
   bool buttonState = digitalRead(buttonPin);
-  static bool lastButtonState = 1;
+  static bool lastButtonState = 0;
 
 
   if (lastButtonState && !buttonState){ // falling edge
@@ -26,11 +26,7 @@ bool readUIButton(){
     delay(dt);
     lastButtonState = buttonState;
     return false;
-  }
-  else{
-    return false;  
-  }
-    
+  }    
 }
 
 

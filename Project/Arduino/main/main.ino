@@ -1,10 +1,11 @@
 #include "src/finger/finger.h"  // doing it like this so git will keep up
 #include "src/constants.h"
 #include "src/functions.h"
-#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+// #include <LiquidCrystal_I2C.h>
+// LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-#define DEBUG_STATE 0  // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID
+// 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction
+#define DEBUG_STATE 2
 
 // general
 int state = -1;
@@ -18,14 +19,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(fA_chB), ISR_motorA_chB, CHANGE);
 
   // Make this inside the noise of each boundary
-  fingerA._minHallEffectReadingG = 0;
-  fingerA._maxHallEffectReadingG = -780.0;
+  fingerA._minHallEffectReadingG = -65;
+  fingerA._maxHallEffectReadingG = -1140;
 
   //**** Misc
   initUIButton();
   Serial.begin(9600);
-  lcd.init();
-  lcd.backlight();
+  // lcd.init();
+  // lcd.backlight();
 
   // Stop output bouncing
   delay(1000);
@@ -42,6 +43,10 @@ void loop() {
     loopCalibrationTest();
   } else if (DEBUG_STATE == 4) {
     loopPIDTest();
+  }else if (DEBUG_STATE == 5) {
+    loopEncoderTest();
+  }else if (DEBUG_STATE == 6) {
+    loopMotorTest();
   }
 }
 
@@ -51,19 +56,22 @@ void loop() {
 
 void loopNormal() {
   Serial.println(state);
+  // Serial.println(fingerA._calibrated);
+  // Serial.println(fingerA._curOmega);
 
   switch (state) {
-    case -1: // calibrate
-      delay(100);
-      while(fingerA._calibrated == 0){
+    case -1:  // calibrate
+      if (fingerA._calibrated == 0) {
         fingerA.calibrateMotor();
       }
-      // while(fingerB._calibrated == 0){
-      //   fingerB.calibrateMotor();
-      // }
+
+      if (fingerA._calibrated) {
+        state = 0;
+      }
       break;
     case 0:  // idle
       // open all fingers
+
       fingerA.PID(0);
 
       // reset variables
@@ -112,22 +120,22 @@ void loopNormal() {
       break;
   }
 
-  printState(state);
+  // printState(state);
 }
 
-void printState(int curState) {
-  static int lastState = 0;
-  if (curState != lastState) {
-    lcd.print(state);
-    lastState = curState;
-  }
-}
+// void printState(int curState) {
+//   static int lastState = 0;
+//   if (curState != lastState) {
+//     lcd.print(state);
+//     lastState = curState;
+//   }
+// }
 
 /////////////////////////////////////////////////
 //////////////// DEBUG LOOPS ////////////////////
 /////////////////////////////////////////////////
 
-void loopPIDTest(){
+void loopPIDTest() {
   char desiredFinger = 'a';
   finger* curFinger = nullptr;
 
@@ -137,22 +145,21 @@ void loopPIDTest(){
       break;
   }
 
-  const int maxPos = 300;
+  const int maxPos = 400;
   const int minPos = 0;
 
-  static int desPos = minPos;
+  const int switchTime = 1500;
+  static int desPos = maxPos;
+  static unsigned int lastSwitchTime = 0;
+  unsigned int dt = millis() - lastSwitchTime;
 
-
-  if (curFinger->_PIDStationary){
-    if (desPos == minPos){
-      desPos = maxPos;
-    }
-    else if (desPos == maxPos){
-      desPos = minPos;
-    }
+  if (dt > switchTime) {
+    desPos = minPos * (desPos != minPos) + maxPos * (desPos != maxPos);
+    lastSwitchTime = millis();
   }
 
   curFinger->PID(desPos);
+  Serial.println(curFinger->_curPos);
 }
 
 void loopCalibrationTest() {
@@ -165,23 +172,75 @@ void loopCalibrationTest() {
       break;
   }
 
-  static bool stateCalib = 0;
+  static int stateCalib = 0;
   switch (stateCalib) {
     case 0:
       curFinger->_calibrated = 0;
-      delay(1000);
+      delay(100);
       stateCalib = 1;
       break;
     case 1:
+      delay(100);
       curFinger->calibrateMotor();
+      if (curFinger->_calibrated == 1){
+        stateCalib = 2;
+        Serial.println("Calibration Complete");
+      }
       break;
+    case 2:
+     
+      // delay(2000);
+    break;
   }
 
-  Serial.println(curFinger->_calibrated);
+  // Serial.println(curFinger->_curPos);
+  // Serial.println(stateCalib);
 }
 
 void loopUIButton() {
   Serial.println(readUIButton());
+}
+
+void loopEncoderTest() {
+  char desiredFinger = 'a';
+
+  int compression = 0;
+  float reading = 0;
+
+  finger* curFinger = nullptr;
+
+  switch (desiredFinger) {
+    case 'a':
+      curFinger = &fingerA;
+      break;
+  }
+
+  Serial.print(curFinger->_curPos);
+  Serial.print("\t");
+  Serial.println("SWITCH CHA and CHB IF MOVING TOWARDS CENTER DECREASES CURPOS");
+}
+
+void loopMotorTest() {
+  char desiredFinger = 'a';
+
+  int compression = 0;
+  float reading = 0;
+
+  finger* curFinger = nullptr;
+
+  switch (desiredFinger) {
+    case 'a':
+      curFinger = &fingerA;
+      break;
+  }
+
+  const int commandPWM = 100;
+  curFinger->driveMotor(commandPWM);
+
+  Serial.print("Commanded PWM: ");
+  Serial.print(commandPWM);
+  Serial.print("\t");  
+  Serial.println("SWITCH IN1 and IN2 IF NOT MOVING TOWARDS CENTER");
 }
 
 void loopHallEffect() {

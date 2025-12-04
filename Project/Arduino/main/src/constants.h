@@ -17,8 +17,7 @@
 ///////////////// FINGERS ///////////////////////
 /////////////////////////////////////////////////
 
-// finger constants
-// inline makes it so we can treat these values as global vars
+// NOTE: inline makes it so we can treat these values as global vars
 
 // finger A
 #define fA_IN1 53

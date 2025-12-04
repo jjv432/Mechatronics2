@@ -26,7 +26,7 @@ public:
   int _curOmega = 0; // in tick/ms;
   float _kp = 0.5;
   float _ki = 0.000006;//1;
-  float _kd = 0.0003;
+  float _kd = 0.0008;
   int _EN;
   int _IN_1;
   int _IN_2;

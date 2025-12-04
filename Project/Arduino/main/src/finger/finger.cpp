@@ -222,23 +222,25 @@ void finger::releaseMotor() {
 }
 
 void finger::calibrateMotor() {
+  const int testSpeed = -150;
 
-  const int testSpeed = 200;
   static int lastPos = -999;
   static int state = 0;
+
+  // Serial.println(state);
 
   switch(state){
     // you just started calibrating
     case 0:
-      finger::driveMotor(255);
-      if (_curPos > 5){
+      finger::driveMotor(-250);
+      if (abs(_curPos) > 25){
         state = 1;
       }
       break;
     // now, omega has started to update and you can rely on it
     case 1: 
       finger::driveMotor(testSpeed);
-      if (_curOmega == 0){
+      if (_curPos == lastPos){
         state = 2;
       }
       lastPos = _curPos;
@@ -246,7 +248,10 @@ void finger::calibrateMotor() {
     case 2:
       _calibrated = true;
       finger::releaseMotor();
+      delay(500);
+      _curPos = 0;
       break;
+
   }  
   
 }
