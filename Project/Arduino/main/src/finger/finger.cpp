@@ -27,10 +27,8 @@ void finger::init() {
   pinMode(_ch_b, INPUT_PULLUP);
 
   // enable the hall effect input
-  pinMode(_hallEffectPin, INPUT);
-
-  // Make UI button PUP
-  pinMode(_hallEffectPin, INPUT);
+  // pinMode(_hallEffectPin, INPUT);
+  
 }
 
 /////////////////////////////////////////////////

@@ -11,5 +11,7 @@ void ISR_motorA_chA();
 void ISR_motorA_chB();
 void ISR_motorB_chA();
 void ISR_motorB_chB();
+void ISR_motorC_chA();
+void ISR_motorC_chB();
 
 #endif

@@ -5,8 +5,8 @@
 // LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction
-#define DEBUG_STATE 6
-#define DEBUG_FINGER 'c'
+#define DEBUG_STATE 6 
+#define DEBUG_FINGER 'b'
 
 static finger* curFinger = nullptr;
 
@@ -74,7 +74,23 @@ void loop() {
     loopEncoderTest();
   } else if (DEBUG_STATE == 6) {
     loopMotorTest();
+  } else if (DEBUG_STATE == 7) {
+    loopPinTest();
   }
+}
+
+void loopPinTest() {
+  noInterrupts();
+  static bool ran = false;
+  int desPin = 23;
+  if (ran == 0) {
+
+    pinMode(desPin, INPUT_PULLUP);
+    ran = 1;
+  }
+  Serial.println(digitalRead(desPin));
+  delay(100);
+  interrupts();
 }
 
 /////////////////////////////////////////////////
