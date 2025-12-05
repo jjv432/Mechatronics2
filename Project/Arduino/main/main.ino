@@ -4,7 +4,7 @@
 // #include <LiquidCrystal_I2C.h>
 // LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction
+// 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction, 7= pin test, 8 = test led
 #define DEBUG_STATE 6 
 #define DEBUG_FINGER 'b'
 
@@ -40,6 +40,7 @@ void setup() {
   //**** Misc
   initUIButton();
   Serial.begin(9600);
+  enableLED();
   // lcd.init();
   // lcd.backlight();
 
@@ -76,9 +77,18 @@ void loop() {
     loopMotorTest();
   } else if (DEBUG_STATE == 7) {
     loopPinTest();
+  } else if (DEBUG_STATE == 8) {
+    loopLEDTest();
   }
 }
 
+void loopLEDTest(){
+  static unsigned int state = 0;
+
+  updateLED(state % 4);
+  delay(1000);
+  state ++;
+}
 void loopPinTest() {
   noInterrupts();
   static bool ran = false;
