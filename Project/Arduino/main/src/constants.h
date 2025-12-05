@@ -17,6 +17,7 @@
 #define LED_GREEN 11
 
 
+
 /////////////////////////////////////////////////
 ///////////////// FINGERS ///////////////////////
 /////////////////////////////////////////////////
@@ -37,11 +38,11 @@
 inline finger fingerA(fA_IN1, fA_IN2, fA_EN, fA_chA, fA_chB, fA_hallEffectPin);
 
 // finger B
-#define fB_IN1 6
-#define fB_IN2 7
-#define fB_EN 8
-#define fB_chA 16
-#define fB_chB 17
+#define fB_IN1 51
+#define fB_IN2 50
+#define fB_EN 44
+#define fB_chA 18
+#define fB_chB 19
 #define fB_hallEffectPin 11
 
 inline finger fingerB(fB_IN1, fB_IN2, fB_EN, fB_chA, fB_chB, fB_hallEffectPin);
