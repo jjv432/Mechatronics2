@@ -13,8 +13,8 @@
 #define IRPin 30
 
 // LED
-#define LED_RED 10
-#define LED_GREEN 11
+#define LED_RED 33
+#define LED_GREEN 34
 
 
 
@@ -38,21 +38,21 @@
 inline finger fingerA(fA_IN1, fA_IN2, fA_EN, fA_chA, fA_chB, fA_hallEffectPin);
 
 // finger B
-#define fB_IN1 51
-#define fB_IN2 50
+#define fB_IN1 50
+#define fB_IN2 51
 #define fB_EN 44
-#define fB_chA 18
-#define fB_chB 19
+#define fB_chA 19
+#define fB_chB 18
 #define fB_hallEffectPin 11
 
 inline finger fingerB(fB_IN1, fB_IN2, fB_EN, fB_chA, fB_chB, fB_hallEffectPin);
 
 // finger C
-#define fC_IN1 5
-#define fC_IN2 4
-#define fC_EN 3
-#define fC_chA 19
-#define fC_chB 18
+#define fC_IN1 49
+#define fC_IN2 48
+#define fC_EN 46
+#define fC_chA 2
+#define fC_chB 3
 #define fC_hallEffectPin 10
 
 inline finger fingerC(fC_IN1, fC_IN2, fC_EN, fC_chA, fC_chB, fC_hallEffectPin);

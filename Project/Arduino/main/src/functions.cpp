@@ -121,7 +121,7 @@ void enableLED(){
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
 }
-void updateLed(int state){
+void updateLED(int state){
   switch(state){
     case 0: 
       digitalWrite(LED_RED, HIGH);
