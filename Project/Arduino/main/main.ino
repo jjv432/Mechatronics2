@@ -4,13 +4,13 @@
 
 // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction, 7= pin test, 8 = test led
 
-#define DEBUG_STATE 5
+#define DEBUG_STATE 3
 #define DEBUG_FINGER 'b'
 
 static finger* curFinger = nullptr;
 
 // general
-int state = -1;
+int state = -31;
 char curObject = 'U';
 
 void setup() {
@@ -29,11 +29,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(fC_chB), ISR_motorC_chB, CHANGE);
 
   // Make this inside the noise of each boundary
-  // fingerA._minHallEffectReadingG = -65;
-  // fingerA._maxHallEffectReadingG = -800;
+  fingerA._minHallEffectReadingG = -72;
+  fingerA._maxHallEffectReadingG = -840;
 
-  // fingerB._minHallEffectReadingG = -65;
-  // fingerB._maxHallEffectReadingG = -800;
+  fingerB._minHallEffectReadingG = -58;
+  fingerB._maxHallEffectReadingG = -710;
+
+  fingerC._minHallEffectReadingG = -70;
+  fingerC._maxHallEffectReadingG = -440;
 
   //**** Misc
   initUIButton();
@@ -88,23 +91,62 @@ void loop() {
 
 void loopNormal() {
 
-  switch (state) {
-    case -1:  // calibrate
-      if (fingerA._calibrated == 0) {
-        fingerA.calibrateMotor();
-      }
+  const int dt1 = 1500;
+  const int dt0 = 500;
 
-      if (fingerA._calibrated) {
-        state = 0;
-        delay(200);
-        Serial.println("State: Calibrated, awaiting UI");
-      }
-      Serial.println("State: Uncalibrated");
+  switch (state) {
+    case -31: 
+      delay(dt0);
+      fingerA._calibrated = 0;
+      fingerA._curPos = 0;
+      state = -3;
       break;
+    case -3:  // calibrate A
+      delay(dt0);
+      fingerA.calibrateMotor();
+      if (fingerA._calibrated) {
+        state = -21;
+        Serial.println("A Calibrated");
+        delay(dt1);
+      }
+      break;
+    case -21: 
+      delay(dt0);
+      fingerB._calibrated = 0;
+      fingerB._curPos = 0;
+      state = -2;
+      break;
+    case -2:  // calibrate A
+      delay(dt0);
+      fingerB.calibrateMotor();
+      if (fingerB._calibrated) {
+        state = -11;
+        Serial.println("B Calibrated");
+        delay(dt1);
+      }
+      break;
+    case -11: 
+      delay(dt0);
+      fingerC._calibrated = 0;
+      fingerC._curPos = 0;
+      state = -1;
+      break;
+    case -1:  // calibrate A
+      delay(dt0);
+      fingerC.calibrateMotor();
+      if (fingerC._calibrated) {
+        state = 0;
+        Serial.println("C Calibrated");
+        delay(dt1);
+      }
+      break;
+
     case 0:  // idle
       // open all fingers
 
       fingerA.PID(0);
+      fingerB.PID(0);
+      fingerC.PID(0);
 
       // reset variables
       curObject = 'U';
@@ -119,11 +161,15 @@ void loopNormal() {
     case 20:
       {
         bool aTouching = fingerA.touchObject();
+        bool bTouching = fingerB.touchObject();
+        bool cTouching = fingerC.touchObject();
 
-        if (aTouching) {
+        if (aTouching && bTouching && cTouching) {
           state = 30;
           Serial.println("State: Trying to grasp object");
           fingerA._flushGO = 1;
+          fingerB._flushGO = 1;
+          fingerC._flushGO = 1;
         }
         break;
 
@@ -135,6 +181,8 @@ void loopNormal() {
         int graspCompression = 40;  // percent
 
         fingerA.graspObject(graspCompression);
+        fingerB.graspObject(graspCompression);
+        fingerC.graspObject(graspCompression);
 
         if (readUIButton()) {
           state = 50;
@@ -148,19 +196,30 @@ void loopNormal() {
 
       // open all fingers
       fingerA.PID(150);
-      Serial.println(fingerA._curPos);
+      fingerB.PID(150);
+      fingerC.PID(150);
+      Serial.print(fingerA._curPos);
+      Serial.print("\t");
+      Serial.print(fingerB._curPos);
+      Serial.print("\t");
+      Serial.print(fingerC._curPos);
+      Serial.print("\t");
 
       // When they're all fully open
-      if (fingerA._curOmega == 0) {
+      if (fingerA._curOmega == 0 && fingerB._curOmega == 0 && fingerC._curOmega == 0) {
         state = 0;
         fingerA._flushI = 1;
         fingerA._flushTO = 1;
+        fingerB._flushI = 1;
+        fingerB._flushTO = 1;
+        fingerC._flushI = 1;
+        fingerC._flushTO = 1;
         Serial.println("State: Open grasp");
       }
       break;
   }
 
-  printState(state);
+  // printState(state);
 }
 
 void printState(int curState) {
@@ -223,7 +282,6 @@ void loopCalibrationTest() {
       }
       break;
     case 2:
-
       // delay(2000);
       break;
   }
