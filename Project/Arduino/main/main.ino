@@ -9,20 +9,6 @@
 
 static finger* curFinger = nullptr;
 
-#if DEBUG_STATE != 0
-  switch (DEBUG_FINGER) {
-    case 'a':
-      curFinger = &fingerA;
-      break;
-    case 'b':
-      curFinger = &fingerB;
-      break;
-    case 'c':
-      curFinger = &fingerC;
-      break;
-  }
-#endif
-
 // general
 int state = -1;
 char curObject = 'U';
@@ -53,6 +39,20 @@ void setup() {
   initUIButton();
   Serial.begin(9600);
   enableLED();
+
+  if (DEBUG_STATE != 0) {
+    switch (DEBUG_FINGER) {
+      case 'a':
+        curFinger = &fingerA;
+        break;
+      case 'b':
+        curFinger = &fingerB;
+        break;
+      case 'c':
+        curFinger = &fingerC;
+        break;
+    }
+  }
 
   // Stop output bouncing
   delay(1000);
@@ -166,7 +166,7 @@ void loopNormal() {
 void printState(int curState) {
   static int lastState = 0;
   if (curState != lastState) {
-    lcd.print(state);
+    Serial.print(state);
     lastState = curState;
   }
 }
@@ -268,7 +268,7 @@ void loopEncoderTest() {
 // 6: TEST MOTOR DIRECTION
 
 void loopMotorTest() {
-  
+
   const int commandPWM = 200;
   curFinger->driveMotor(commandPWM);
 
@@ -293,20 +293,10 @@ void loopPinTest() {
 
 // 8: TEST LED
 
-void loopLEDTest(){
+void loopLEDTest() {
   static unsigned int state = 0;
 
   updateLED(state % 4);
   delay(1000);
-  state ++;
+  state++;
 }
-
-
-
-
-
-
-
-
-
-
