@@ -5,8 +5,8 @@
 // LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // 0= normal operation, 1= print hall effect, 2= print UI button, 3= test calibration, 4 = test PID, 5 = test encoder direction, 6 = test motor direction, 7= pin test, 8 = test led
-#define DEBUG_STATE 5
-#define DEBUG_FINGER 'b'
+#define DEBUG_STATE 6
+#define DEBUG_FINGER 'c'
 
 static finger* curFinger = nullptr;
 
