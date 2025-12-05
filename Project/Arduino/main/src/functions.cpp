@@ -113,8 +113,32 @@ void ISR_motorC_chB() {
 }
 
 
-
 /////////////////////////////////////////////////
-////////////// HELPER FUNCTIONS /////////////////
+//////////////// LED FUNCTIONS //////////////////
 /////////////////////////////////////////////////
 
+void enableLED(){
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+}
+void updateLed(int state){
+  switch(state){
+    case 0: 
+      digitalWrite(LED_RED, HIGH);
+      digitalWrite(LED_GREEN, LOW);
+      break;
+    case 1: 
+      digitalWrite(LED_RED, LOW);
+      digitalWrite(LED_GREEN, HIGH);
+      break;
+    case 2: 
+      digitalWrite(LED_RED, HIGH);
+      digitalWrite(LED_GREEN, HIGH);
+      break;
+    default: 
+      digitalWrite(LED_RED, LOW);
+      digitalWrite(LED_GREEN, LOW);
+      break;
+  }
+
+}

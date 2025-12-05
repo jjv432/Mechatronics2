@@ -13,5 +13,6 @@ void ISR_motorB_chA();
 void ISR_motorB_chB();
 void ISR_motorC_chA();
 void ISR_motorC_chB();
+void updateLed(int state);
 
 #endif
