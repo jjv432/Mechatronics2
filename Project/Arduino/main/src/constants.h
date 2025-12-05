@@ -33,7 +33,7 @@
 #define fA_EN 45
 #define fA_chA 21
 #define fA_chB 20
-#define fA_hallEffectPin A0
+#define fA_hallEffectPin A1
 
 inline finger fingerA(fA_IN1, fA_IN2, fA_EN, fA_chA, fA_chB, fA_hallEffectPin);
 
@@ -43,12 +43,12 @@ inline finger fingerA(fA_IN1, fA_IN2, fA_EN, fA_chA, fA_chB, fA_hallEffectPin);
 #define fB_EN 44
 #define fB_chA 19
 #define fB_chB 18
-#define fB_hallEffectPin A1
+#define fB_hallEffectPin A0
 
 inline finger fingerB(fB_IN1, fB_IN2, fB_EN, fB_chA, fB_chB, fB_hallEffectPin);
 
 // finger C
-#define fC_IN1 49
+#define fC_IN1 47
 #define fC_IN2 48
 #define fC_EN 46
 #define fC_chA 2

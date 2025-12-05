@@ -74,7 +74,7 @@ bool finger::graspObject(int desCompression){
 bool finger::touchObject(){
   static int setPoint = 0;
   const int contactThreshold = 5; // percent;
-  const int PIDIncrement = 2;
+  const int PIDIncrement = 5;
   static int lastContactFlag = 0;
 
   int curCompression = finger::getHallEffectCompression();  
@@ -235,7 +235,7 @@ void finger::releaseMotor() {
 }
 
 void finger::calibrateMotor() {
-  const int testSpeed = -225;
+  const int testSpeed = -220;
 
   static int lastPos = -999;
   static int state = 0;
@@ -261,9 +261,9 @@ void finger::calibrateMotor() {
     case 2:
       _calibrated = true;
       finger::releaseMotor();
-      delay(1000);
       _curPos = 0;
       lastPos = -999;
+      state = 0;
       break;
 
   }  
