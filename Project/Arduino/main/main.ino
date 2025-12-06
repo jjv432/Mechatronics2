@@ -95,6 +95,7 @@ void loop() {
 //////////////// NORMAL LOOP ////////////////////
 /////////////////////////////////////////////////
 static int openTime = 0;
+const int restPoint = 150;
 void loopNormal() {
   // Serial.print(fingerA._calibrated);
   // Serial.print("\t");
@@ -140,9 +141,9 @@ void loopNormal() {
     case 0:  // idle
       // open all fingers
 
-      fingerA.PID(100);
-      fingerB.PID(100);
-      fingerC.PID(100);
+      fingerA.PID(restPoint);
+      fingerB.PID(restPoint);
+      fingerC.PID(restPoint);
 
       // reset variables
       curObject = 'U';
@@ -193,20 +194,40 @@ void loopNormal() {
     case 50:  // drop the object
 
       // open all fingers
-      fingerA.PID(0);
-      fingerB.PID(0);
-      fingerC.PID(0);
+      fingerA.PID(restPoint);
 
       // When they're all fully open
-      if ((millis() - openTime > 1000)||(fingerA._curOmega == 0 && fingerB._curOmega == 0 && fingerC._curOmega == 0)) {
-        state = 0;
+      if ((millis() - openTime > 4000)||(fingerA._curOmega == 0)) {
+        state = 51;
         fingerA._flushI = 1;
         fingerA._flushTO = 1;
+        openTime = millis();
+      }
+      break;
+    case 51:  // drop the object
+
+      // open all fingers
+      fingerB.PID(restPoint);
+
+      // When they're all fully open
+      if ((millis() - openTime > 4000)||(fingerB._curOmega == 0)) {
+        state = 52;
         fingerB._flushI = 1;
         fingerB._flushTO = 1;
+        openTime = millis();
+      }
+      break;
+    case 52:  // drop the object
+
+      // open all fingers
+      fingerC.PID(restPoint);
+
+      // When they're all fully open
+      if ((millis() - openTime > 4000)||(fingerC._curOmega == 0)) {
+        state = 0;
         fingerC._flushI = 1;
         fingerC._flushTO = 1;
-        Serial.println("State: Open grasp");
+        delay(1000);
       }
       break;
   }
